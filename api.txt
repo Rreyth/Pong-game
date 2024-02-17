@@ -1,0 +1,59 @@
+ {'type' : <type>, 'cmd' : <cmd>, ...}
+    -> Reply to request
+    => Message recieved without request
+    
+    
+CONNECTION:
+ 
+ 	with username:
+ 		'type' : 'connect'
+ 		'cmd' : 'username'
+ 		'username' : <username>
+ 		'password' : <password>
+ 		-> 'type' : 'connectionRpl'
+ 		   'success' : 'true' / 'false'
+ 		   'error' : 'none' / <errormsg>
+ 		   
+ 	with token:
+ 		'type' : 'connect'
+ 		'cmd' : 'token'
+ 		'token' : <token>
+ 		-> 'type' : 'connectionRpl'
+ 		   'success' : 'true' / 'false'
+ 		   'error' : 'none' / <errormsg>
+ 		   
+ 		   
+QUICK GAME:
+	
+	create/join quick game:
+		'type' : 'quickGame'
+		'cmd' : 'join'
+		'mode' : 'local' / 'online'
+		-> 'type' : 'waiting' if online, if local 'starting'
+		   'RoomId' : <game room id>
+		
+	quit quick game waitlist:
+		'type' : 'quickGame'
+		'cmd' : 'quit'
+		-> 'type' : 'quitWait'
+		
+	=> GameStart:
+		'type' : 'GameStart'
+		'address' : <gameRoom address>
+		'id' : <paddle id>
+		'side' : <player side>
+		
+JOIN GAME:
+
+	'type' : 'game'
+	'cmd' : 'join'
+	'id' : <game id>
+	-> 'type' : 'joinRoom'
+	   'success' : 'true' / 'false'
+	   'error' : 'none' / <errormsg>
+	
+	
+	
+	
+	
+	
