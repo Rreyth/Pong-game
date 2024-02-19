@@ -4,23 +4,7 @@ import json
 
 from game.core import *
 
-class Client:
-	def __init__(self, websocket):
-		self.GameHub = websocket
-		self.game = Game(websocket) #give websocket ? jpense pas...... enfait si
 
-
-	async def run(self):
-		#self.game.run()
-		gameAddress = await self.game.gameMenu(self.GameHub) #self.game.menu(self.GameHub) ????
-  
-		#async with websockets.connect(gameAddress) as gameSocket:
-			#while True: ####game.run(gameSocket) ???
-				#update game info with serv info
-				#input
-				#tick + send input to serv
-				#render
-				#clock
 
 
 	# async def game_menu(self): ##menu mode modif game_mode dict and send it to serv when click on start 
@@ -70,8 +54,10 @@ async def receive_updates(websocket): # receive + draw
 async def main():
 	async with websockets.connect("ws://localhost:6669") as websocket:
 		await try_connect(websocket)
-		client = Client(websocket)
-		await client.run()
+		game = Game(websocket)
+		await game.run()
+		# gameAddress = await game.gameMenu() #degage chacal
+  
 		# await game_menu(websocket)
 	
 	# async with websockets.connect(game_address) as game_socket:
@@ -81,3 +67,20 @@ async def main():
 
 asyncio.run(main())
 
+# class Client:
+# 	def __init__(self, websocket):
+# 		self.GameHub = websocket
+# 		self.game = Game(websocket) #give websocket ? jpense pas...... enfait si
+
+
+# 	async def run(self):
+# 		#self.game.run()
+# 		gameAddress = await self.game.gameMenu(self.GameHub) #self.game.menu(self.GameHub) ????
+  
+		#async with websockets.connect(gameAddress) as gameSocket:
+			#while True: ####game.run(gameSocket) ???
+				#update game info with serv info
+				#input
+				#tick + send input to serv
+				#render
+				#clock

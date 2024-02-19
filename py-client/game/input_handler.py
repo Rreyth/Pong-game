@@ -14,11 +14,11 @@ def input_handler(core):
 			input_handler_ai(core, core.players[1])
 	
 
-def mouse_handler(core):
+async def mouse_handler(core):
 	if core.state == "end":
 		end_input(core)
 	elif core.state == "menu":
-		menu_input(core)
+		await menu_input(core)
 	elif core.pause[0]:
 		pause_input(core)
 	elif core.state == "custom":
@@ -33,9 +33,9 @@ def end_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
 		core.end.click(core, core.mousePos)
 
-def menu_input(core):
+async def menu_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
-		core.menu.click(core, core.mousePos)
+		await core.menu.click(core, core.mousePos)
 
 def pause_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():

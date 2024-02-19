@@ -33,14 +33,14 @@ class Game:
 		self.ai = []
 
 	
-	def run(self): #run game loop # relaunch when modif state
+	async def run(self): #run game loop # relaunch when modif state
 		while True:
-			self.input()
+			await self.input()
 			self.tick()
 			self.render()
 			self.clock.tick(self.fps)
 			
-	def input(self): #catch user input
+	async def input(self): #catch user input
 		for event in pg.event.get():
 			if event.type == pg.QUIT: #event click on cross
 				self.quit()
@@ -49,7 +49,7 @@ class Game:
 			if event.type == pg.MOUSEBUTTONDOWN:
 				self.mouseState = pg.mouse.get_pressed()
 				self.mousePos = pg.mouse.get_pos()
-				mouse_handler(self)
+				await mouse_handler(self)
     
 		self.keyboardState = pg.key.get_pressed()
 
@@ -84,19 +84,3 @@ class Game:
 	def quit(self):
 		pg.quit()
 		sys.exit()
-
-	async def gameMenu(self, GameHub): ##tmp ça va bouger cette merde
-		#affichage + interaction des menus
-		#send game info to socket
-		#recv creation success waiting or join success etc... + game address
-		#return game address
-		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "local"}
-		await GameHub.send(json.dumps(msg))
-		response : dict = json.loads(await GameHub.recv())
-		print(response)
-		#waiting screen if response = waiting
-		#wait for game start msg
-		#stock info
-		# return gameAddress
-
-# Game().run()

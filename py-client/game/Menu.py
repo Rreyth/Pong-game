@@ -26,34 +26,68 @@ class Menu:
 			button.draw(win)
    
    
-	def click(self, core, mousePos):
+	async def click(self, core, mousePos):
 		for button in self.buttons:
 			if button.hitbox.collidepoint(mousePos):
-				setValues(button.name, core)
+				await setValues(button.name, core)
 	
  
-def setValues(name, core):
+async def setValues(name, core):
 	core.custom_mod = False
 	core.obstacle = False
 	if name == "LOCAL":
-		core.max_score = 5
-		core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
-		core.walls = [Wall("up", False), Wall("down", False)]
-		core.ball = Ball(False)
-		core.state = "start"
-		core.mode = "LOCAL"
+		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "local"}
+		await core.GameHub.send(json.dumps(msg))
+		response : dict = json.loads(await core.GameHub.recv())
+		print(response)
+  
+		# directly wait for game room
+		
+		#waiting screen if response = waiting
+		#wait for game start msg
+		#stock info
+  
 	if name == "SOLO":
-		core.max_score = 5
-		core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
-		core.ai.append(AI(core.players[1]))
-		core.walls = [Wall("up", False), Wall("down", False)]
-		core.ball = Ball(False)
-		core.state = "start"
-		core.mode = "solo"
+		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "solo"}
+		await core.GameHub.send(json.dumps(msg))
+		response : dict = json.loads(await core.GameHub.recv())
+		print(response)
+  
+		# directly wait for game room
+  
+		# core.max_score = 5
+		# core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
+		# core.ai.append(AI(core.players[1]))
+		# core.walls = [Wall("up", False), Wall("down", False)]
+		# core.ball = Ball(False)
+		# core.state = "start"
+		# core.mode = "solo"
 	if name == "CUSTOM":
 		core.state = "custom"
 		core.custom_menu = CustomMenu()
 	if name == "ONLINE":
-		pass
+		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "online"}
+		await core.GameHub.send(json.dumps(msg))
+		response : dict = json.loads(await core.GameHub.recv())
+		print(response)
+		# go in waiting screen
+
+		#waiting screen if response = waiting
+		#wait for game start msg
+		#stock info
 	if core.mode != "none":
 		core.start_screen = StartScreen(core.mode)
+
+
+
+# async def gameMenu(self): ##tmp ça va bouger cette merde
+	# 	#affichage + interaction des menus
+	# 	#send game info to socket
+	# 	#recv creation success waiting or join success etc... + game address
+	# 	#return game address
+	# 	msg = {"type" : "quickGame", "cmd" : "join", "mode" : "local"}
+	# 	await self.GameHub.send(json.dumps(msg))
+	# 	response : dict = json.loads(await self.GameHub.recv())
+	# 	print(response)
+
+	# 	# return gameAddress
