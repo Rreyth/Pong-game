@@ -7,6 +7,7 @@ from .Pause import *
 from .AI import *
 from .Custom import *
 from .Button import *
+import websockets
 
 class Menu:
 	def __init__(self):
@@ -51,15 +52,22 @@ async def setValues(name, core):
 		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "solo"}
 		await core.GameHub.send(json.dumps(msg))
 		response : dict = json.loads(await core.GameHub.recv())
-		print(response)
+		if 'socket' in response.keys():
+			core.GameRoom = await websockets.connect(response['socket'])
+			await core.GameRoom.send(json.dumps({'type' : 'join'}))
+			response : dict = json.loads(await core.GameRoom.recv())
+			print(response)
+			if response['type'] == 'start':
+				core.state = "start"
+				core.mode = "solo"
   
 		# directly wait for game room
   
-		# core.max_score = 5
-		# core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
-		# core.ai.append(AI(core.players[1]))
-		# core.walls = [Wall("up", False), Wall("down", False)]
-		# core.ball = Ball(False)
+		core.max_score = 5
+		core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
+		core.ai.append(AI(core.players[1]))
+		core.walls = [Wall("up", False), Wall("down", False)]
+		core.ball = Ball(False)
 		# core.state = "start"
 		# core.mode = "solo"
 	if name == "CUSTOM":
@@ -70,6 +78,7 @@ async def setValues(name, core):
 		await core.GameHub.send(json.dumps(msg))
 		response : dict = json.loads(await core.GameHub.recv())
 		print(response)
+		
 		# go in waiting screen
 
 		#waiting screen if response = waiting

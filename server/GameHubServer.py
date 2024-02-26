@@ -31,7 +31,7 @@ async def handle_quickGame(client_msg, websocket):
 		await websocket.send(json.dumps({'type' : 'quitWait'}))
 	elif client_msg['cmd'] == 'join':
 		if client_msg['mode'] == 'local':
-			await websocket.send(json.dumps({'type' : 'starting'}))
+			# await websocket.send(json.dumps({'type' : 'starting'}))
 			port = starting_port
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
 			used_port.append(port)
@@ -50,11 +50,30 @@ async def handle_quickGame(client_msg, websocket):
 				#transmet au serv principale les info de endGame ??
 
 		elif client_msg['mode'] == 'solo':
-			await websocket.send(json.dumps({'type' : 'starting'}))
+			# await websocket.send(json.dumps({'type' : 'starting'}))
+			port = starting_port + 5
+			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
+			used_port.append(port)
+			host = 'localhost'
+			os.system("python3 game/core.py {} {} &".format(host, port))
+			time.sleep(0.1)
+			async with websockets.connect("ws://{}:{}".format(host, port)) as gameSocket:
+				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'solo'}
+				await gameSocket.send(json.dumps(msg))
+				response : dict = json.loads(await gameSocket.recv())
+				while response['type'] != 'endGame':
+					if response['type'] == 'CreationSuccess':
+						#generate aleat room id + stock pour eviter les doublons
+						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : '1111', 'socket' : 'ws://{}:{}'.format(host, port)}))
+					# if response['type'] == 'GameStart':
+					# 	await websocket.send(json.dumps(response))
+					response : dict = json.loads(await gameSocket.recv())
+   
+   
 			#create 1 vs AI room local mode
 			# wait for ready msg from the game ?
 		elif client_msg['mode'] == 'online':
-			await websocket.send(json.dumps({'type' : 'waiting', 'RoomId' : '1234'}))#Room id gen aleat when openning the room %10000
+			await websocket.send(json.dumps({'type' : 'waiting', 'ID' : '1234'}))#Room id gen aleat when openning the room %10000
 			#create 1v1 basic room online mode
 			# wait for ready msg from the game ?
 		# elif custom (plus d'info a gerer)

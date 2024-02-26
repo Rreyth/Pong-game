@@ -31,6 +31,7 @@ class Game:
 		self.end = End() #faire des variation ? passer dans menu ?
 		self.font = pg.font.Font(font, int(textSize))
 		self.ai = []
+		self.pressed = []
 
 	
 	async def run(self): #run game loop # relaunch when modif state
@@ -59,6 +60,10 @@ class Game:
 		tmp = time.time()
 		delta = tmp - self.last
 		self.last = tmp
+
+		#await send info
+		#await recv info
+		# update_all with received
 
 		update_all(self, delta)
 

@@ -43,11 +43,14 @@ def pause_input(core):
 
 def	input_handler_1p(core, player):
 	if core.keyboardState[pg.K_UP] or core.keyboardState[pg.K_w]:
-		player.moveUp(core.walls)
+		# player.moveUp(core.walls)
+		core.pressed.append("UP")
 	if core.keyboardState[pg.K_DOWN] or core.keyboardState[pg.K_s]:
-		player.moveDown(core.walls)
+		# player.moveDown(core.walls)
+		core.pressed.append("DOWN")
 	if core.keyboardState[pg.K_SPACE] and core.ball.stick == player.nb:
-		core.ball.launch()
+		core.pressed.append("LAUNCH")
+		# core.ball.launch()
   
 def input_handler_ai(core, ai): # standby, when client version, launch msg to serv
 	if core.keyboardState[pg.K_KP8]:
