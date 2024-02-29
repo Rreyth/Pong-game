@@ -3,7 +3,7 @@ from AI import *
 from Ball import *
 
 def update_all(core, delta):
-	if core.state == "game" and not core.pause[1].freeze:
+	if core.state == "game" and not core.pause:
 
 		core.ball.update(core, delta)
 		if core.obstacle:
@@ -18,6 +18,10 @@ def update_all(core, delta):
 				player.win = "WIN"
 			player.speed = player.speed_per_sec * delta
 	if core.state == "start":
-		core.start_screen.update()
-		if core.start_screen.timer == 0:
+		tmp = time.time()
+		d = tmp - core.start[1]
+		if d >= 1:
+			core.start[1] = tmp
+			core.start[0] -= 1
+		if core.start[0] == 0:
 			core.state = "game"

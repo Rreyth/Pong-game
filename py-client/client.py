@@ -39,23 +39,35 @@ async def try_connect(websocket):
 		exit(1)
 
 
-async def receive_updates(websocket): # receive + draw
-	while True:
-		update = await websocket.recv()
-		print(update)
   
 # async def send_message(websocket): #send inputs
 # 	msg = {"type" : "connect", "cmd" : "username", "username" : "test", "password" : "mabit"}
 # 	print(msg)
 # 	await websocket.send(json.dumps(msg))
 
+async def receive_updates(game):
+	while True:
+		print(game.state)
+		# if game.state == 'game':
+		# 	game.players[0].paddle[0].pos.y -= 1
 
+
+	# while True:
+	# 	update = await websocket.recv()
+	# 	print(update)
 
 async def main():
 	async with websockets.connect("ws://localhost:6669") as websocket:
 		await try_connect(websocket)
 		game = Game(websocket)
-		await game.run()
+		game_task = asyncio.create_task(game.run())
+		# receive_task = asyncio.create_task(receive_updates(game))
+		# send_task = asyncio.create_task()
+		# await game.run()
+		await asyncio.gather(game_task)
+
+
+
 		# gameAddress = await game.gameMenu() #degage chacal
   
 		# await game_menu(websocket)

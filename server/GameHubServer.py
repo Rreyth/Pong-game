@@ -51,7 +51,7 @@ async def handle_quickGame(client_msg, websocket):
 
 		elif client_msg['mode'] == 'solo':
 			# await websocket.send(json.dumps({'type' : 'starting'}))
-			port = starting_port + 5
+			port = starting_port
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
 			used_port.append(port)
 			host = 'localhost'
