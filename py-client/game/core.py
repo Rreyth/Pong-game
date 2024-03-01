@@ -1,6 +1,7 @@
 import time
 import sys
 import json
+import asyncio
 # import websockets
 
 from .input_handler import *
@@ -16,14 +17,9 @@ from .End import *
 from .StartScreen import *
 
 class Game:
-	def __init__(self, websocket): #init class
-		self.GameHub = websocket
+	def __init__(self): #init class
+		self.is_running = True
 		pg.init()
-		self.winSize = [winWidth, winHeight]
-		self.win = pg.display.set_mode(self.winSize)
-		self.clock = pg.time.Clock()
-		self.fps = 120
-		self.last = time.time()
 		self.state = "menu"
 		self.mode = "none"
 		self.menu = Menu()
@@ -33,13 +29,23 @@ class Game:
 		self.ai = []
 		self.pressed = []
 
-	
+	def start(self, websocket):
+		self.GameHub = websocket
+		self.winSize = [winWidth, winHeight]
+		self.win = pg.display.set_mode(self.winSize)
+		pg.display.set_caption("PONG")
+		# self.clock = pg.time.Clock()
+		# self.fps = 100
+		self.last = time.time()
+ 
+ 
 	async def run(self): #run game loop # relaunch when modif state
 		while True:
 			await self.input()
 			self.tick()
 			self.render()
-			self.clock.tick(self.fps)
+			# self.clock.tick(self.fps)
+			await asyncio.sleep(0.01)
 			
 	async def input(self): #catch user input
 		for event in pg.event.get():
@@ -67,7 +73,7 @@ class Game:
 
 		update_all(self, delta)
 
-		pg.display.set_caption(str(self.clock.get_fps()))
+		# pg.display.set_caption(str(self.clock.get_fps()))
 		
 	def render(self): #graphic update
 
@@ -88,4 +94,4 @@ class Game:
 		
 	def quit(self):
 		pg.quit()
-		sys.exit()
+		self.is_running = False

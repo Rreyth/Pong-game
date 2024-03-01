@@ -56,9 +56,8 @@ async def setValues(name, core):
 			core.GameRoom = await websockets.connect(response['socket'])
 			await core.GameRoom.send(json.dumps({'type' : 'join'}))
 			response : dict = json.loads(await core.GameRoom.recv())
-			print(response)
 			if response['type'] == 'start':
-				core.state = "start"
+				core.state = "launch"
 				core.mode = "solo"
   
 		# directly wait for game room

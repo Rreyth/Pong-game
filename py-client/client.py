@@ -4,6 +4,7 @@ import json
 
 from game.core import *
 
+game = Game()
 
 
 
@@ -56,43 +57,47 @@ async def receive_updates(game):
 	# 	update = await websocket.recv()
 	# 	print(update)
 
+
+async def parse_msg(msg : dict, websocket):#todo
+    print(msg)
+
+async def run_menu(): #return le gameroom socket pour pouvoir faire un async with ??
+	global game
+	while game.state == 'menu' and game.is_running:
+		await game.input()
+		game.tick()
+		game.render()
+		await asyncio.sleep(0.01)  
+	
+
+async def run_game():
+	global game
+	while game.is_running:
+		print("ASDASDAS")
+		pass
+
+
 async def main():
+	global game
 	async with websockets.connect("ws://localhost:6669") as websocket:
 		await try_connect(websocket)
-		game = Game(websocket)
-		game_task = asyncio.create_task(game.run())
-		# receive_task = asyncio.create_task(receive_updates(game))
-		# send_task = asyncio.create_task()
-		# await game.run()
-		await asyncio.gather(game_task)
+		game.start(websocket)
+		await run_menu()
+		try:
+			async for message in game.GameRoom:
+				await parse_msg(json.loads(message), game.GameRoom) #todo
+				if game.state == 'launch':
+					game.state = 'start'
+					asyncio.create_task(run_game())				
 
 
+		finally:
+			game.is_running = False
+			if game.GameRoom:
+				await game.GameRoom.close()
+			if game.GameHub:
+				#send close msg
+				await websocket.close() #??? maybe just break to leave the async with ??
 
-		# gameAddress = await game.gameMenu() #degage chacal
-  
-		# await game_menu(websocket)
-	
-	# async with websockets.connect(game_address) as game_socket:
-	# 	receive_task = asyncio.create_task(receive_updates(game_socket)) #changer le websocket pour celui de la game 
-	# 	# send_task = asyncio.create_task(send_inputs(game_socket)) #send inputs
-	# 	await asyncio.gather(receive_task)
 
 asyncio.run(main())
-
-# class Client:
-# 	def __init__(self, websocket):
-# 		self.GameHub = websocket
-# 		self.game = Game(websocket) #give websocket ? jpense pas...... enfait si
-
-
-# 	async def run(self):
-# 		#self.game.run()
-# 		gameAddress = await self.game.gameMenu(self.GameHub) #self.game.menu(self.GameHub) ????
-  
-		#async with websockets.connect(gameAddress) as gameSocket:
-			#while True: ####game.run(gameSocket) ???
-				#update game info with serv info
-				#input
-				#tick + send input to serv
-				#render
-				#clock

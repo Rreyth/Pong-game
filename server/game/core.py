@@ -39,7 +39,7 @@ class Game:
  
 	def sendUpdate(self):
 		msg = {}#toutes les infos de jeu
-		print("TEST SENDUPDATES")
+		# print("TEST SENDUPDATES")
 		# self.sendAll(msg)
  
 	def join(self, websocket):
@@ -77,9 +77,10 @@ async def run_game():
 	global game
 	game.state = "start"
 	while game.is_running:
+		print("test")
 		game.tick()
 		game.sendUpdate()
-		time.sleep(0.01)
+		await asyncio.sleep(0.01)
 
 
 async def handle_game(websocket, path):
@@ -88,9 +89,10 @@ async def handle_game(websocket, path):
 
 	try:
 		async for message in websocket:
-			print("jhgsfbdVdhjkfvb")
+			print("tqt")
 			await parse_msg(json.loads(message), websocket)
 			if game.state == 'ready':
+				await game.sendAll({'type' : 'start'})
 				await game.sendAll({'type' : 'start'})
 				asyncio.create_task(run_game())
 
@@ -98,13 +100,13 @@ async def handle_game(websocket, path):
 	# 	print("CTRRLCSDACACVA")
 	# 	game.is_running = False
 
-	finally:
-		print("eyhrtiubjdfn")
+	finally: #send end msg to gamehub (client 0)
+		print("FINNNNALLLLYYYY")
 		game.is_running = False
 		# print(websocket)
-		# clients.remove(websocket)
-		# if clients.__len__() <= 1:
-		# 	sys.exit()
+		clients.remove(websocket)
+		if clients.__len__() <= 1:
+			sys.exit()
 
  
 async def parse_msg(msg : dict, websocket):
@@ -131,7 +133,7 @@ async def main():
 		return
 	game_server = websockets.serve(handle_game, args[1], args[2])
 	await game_server
-	await asyncio.Event().wait() #useless ????
+	await asyncio.Event().wait()
 
-if __name__ == "__main__":
-	asyncio.run(main())
+
+asyncio.run(main())
