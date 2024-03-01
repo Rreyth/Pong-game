@@ -88,15 +88,18 @@ async def handle_game(websocket, path):
 
 	try:
 		async for message in websocket:
+			print("jhgsfbdVdhjkfvb")
 			await parse_msg(json.loads(message), websocket)
 			if game.state == 'ready':
 				await game.sendAll({'type' : 'start'})
 				asyncio.create_task(run_game())
 
-	except KeyboardInterrupt:
-		game.is_running = False
+	# except KeyboardInterrupt:
+	# 	print("CTRRLCSDACACVA")
+	# 	game.is_running = False
 
-	except websockets.ConnectionClosedOK: #remplace finally ?
+	finally:
+		print("eyhrtiubjdfn")
 		game.is_running = False
 		# print(websocket)
 		# clients.remove(websocket)
