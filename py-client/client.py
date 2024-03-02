@@ -1,30 +1,9 @@
 import asyncio
 import websockets
 import json
-
 from game.core import *
 
 game = Game()
-
-
-
-	# async def game_menu(self): ##menu mode modif game_mode dict and send it to serv when click on start 
-	# 	#affichage + interaction des menus
-	# 	#send game info to socket
-	# 	#recv creation success waiting or join success etc... + game address
-	# 	#return game address
-	# 	msg = {"type" : "quickGame", "cmd" : "join", "mode" : "local"}
-	# 	await self.GameHub.send(json.dumps(msg))
-	# 	response : dict = json.loads(await self.GameHub.recv())
-	# 	print(response)
-	# 	#waiting screen if response = waiting
-	# 	#wait for game start msg
-	# 	#stock info
-	# 	# game.change la socket pour celle de la room chacal
-
-
-
-
 
 async def try_connect(websocket):
 	username = input("USERNAME: ")
@@ -40,32 +19,17 @@ async def try_connect(websocket):
 		exit(1)
 
 
-  
-# async def send_message(websocket): #send inputs
-# 	msg = {"type" : "connect", "cmd" : "username", "username" : "test", "password" : "mabit"}
-# 	print(msg)
-# 	await websocket.send(json.dumps(msg))
-
-async def receive_updates(game):
-	while True:
-		print(game.state)
-		# if game.state == 'game':
-		# 	game.players[0].paddle[0].pos.y -= 1
-
-
-	# while True:
-	# 	update = await websocket.recv()
-	# 	print(update)
-
-
 async def parse_msg(msg : dict, websocket):#todo
-    print(msg)
+	global game
+	if msg['type'] == 'update':
+		game.players[0].paddle[0].pos = Vec2(pos=msg['pos'])
 
-async def run_menu(): #return le gameroom socket pour pouvoir faire un async with ??
+
+async def run_menu():
 	global game
 	while game.state == 'menu' and game.is_running:
 		await game.input()
-		game.tick()
+		await game.tick()
 		game.render()
 		await asyncio.sleep(0.01)  
 	
@@ -73,8 +37,12 @@ async def run_menu(): #return le gameroom socket pour pouvoir faire un async wit
 async def run_game():
 	global game
 	while game.is_running:
-		print("ASDASDAS")
-		pass
+		await game.input()
+		if not game.is_running:
+			break
+		await game.tick()
+		game.render()
+		await asyncio.sleep(0.01)
 
 
 async def main():
@@ -85,11 +53,10 @@ async def main():
 		await run_menu()
 		try:
 			async for message in game.GameRoom:
-				await parse_msg(json.loads(message), game.GameRoom) #todo
+				await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
 				if game.state == 'launch':
 					game.state = 'start'
-					asyncio.create_task(run_game())				
-
+					asyncio.create_task(run_game())
 
 		finally:
 			game.is_running = False

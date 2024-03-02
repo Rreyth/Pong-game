@@ -37,17 +37,17 @@ class Game:
 		for client in self.clients:
 			await client.send(json.dumps(msg))
  
-	def sendUpdate(self):
-		msg = {}#toutes les infos de jeu
-		# print("TEST SENDUPDATES")
-		# self.sendAll(msg)
+	async def sendUpdate(self):
+		msg = {'type' : 'update',
+         		'pos' : [self.players[0].paddle[0].pos.x, self.players[0].paddle[0].pos.y]}#toutes les infos de jeu #players : [pos....] # ball : [pos]
+		await self.sendAll(msg)
  
 	def join(self, websocket):
 		self.clients.add(websocket)
 		if self.clients.__len__() == self.requiered:
 			self.state = 'ready'
 			
-	def input(self, player_id, inputs): #recv clients inputs
+	def input(self, player_id, inputs):
 		for input in inputs:
 			if input == "UP":
 				self.players[player_id - 1].moveUp(self.walls)
@@ -67,7 +67,6 @@ class Game:
 		self.last = tmp
 
 		update_all(self, delta)
-		#send game infos
 		
 	def quit(self):
 		sys.exit() #is running -> false
@@ -77,9 +76,8 @@ async def run_game():
 	global game
 	game.state = "start"
 	while game.is_running:
-		print("test")
 		game.tick()
-		game.sendUpdate()
+		await game.sendUpdate()
 		await asyncio.sleep(0.01)
 
 
@@ -89,16 +87,12 @@ async def handle_game(websocket, path):
 
 	try:
 		async for message in websocket:
-			print("tqt")
 			await parse_msg(json.loads(message), websocket)
 			if game.state == 'ready':
 				await game.sendAll({'type' : 'start'})
 				await game.sendAll({'type' : 'start'})
 				asyncio.create_task(run_game())
 
-	# except KeyboardInterrupt:
-	# 	print("CTRRLCSDACACVA")
-	# 	game.is_running = False
 
 	finally: #send end msg to gamehub (client 0)
 		print("FINNNNALLLLYYYY")

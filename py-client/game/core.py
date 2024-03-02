@@ -30,22 +30,13 @@ class Game:
 		self.pressed = []
 
 	def start(self, websocket):
+		self.id = 1
+		self.GameRoom = False
 		self.GameHub = websocket
 		self.winSize = [winWidth, winHeight]
 		self.win = pg.display.set_mode(self.winSize)
 		pg.display.set_caption("PONG")
-		# self.clock = pg.time.Clock()
-		# self.fps = 100
 		self.last = time.time()
- 
- 
-	async def run(self): #run game loop # relaunch when modif state
-		while True:
-			await self.input()
-			self.tick()
-			self.render()
-			# self.clock.tick(self.fps)
-			await asyncio.sleep(0.01)
 			
 	async def input(self): #catch user input
 		for event in pg.event.get():
@@ -57,23 +48,34 @@ class Game:
 				self.mouseState = pg.mouse.get_pressed()
 				self.mousePos = pg.mouse.get_pos()
 				await mouse_handler(self)
-    
+
+		if not self.is_running:
+			return
+
 		self.keyboardState = pg.key.get_pressed()
 
 		input_handler(self)
 		
-	def tick(self): #calcul method
+	async def tick(self): #calcul method
 		tmp = time.time()
 		delta = tmp - self.last
 		self.last = tmp
 
-		#await send info
-		#await recv info
-		# update_all with received
+		await self.sendInputs()
 
 		update_all(self, delta)
 
-		# pg.display.set_caption(str(self.clock.get_fps()))
+	async def sendInputs(self):
+		if self.pressed.__len__() == 0:
+			return
+
+		msg = {'type' : 'input',
+				'player' : self.id,
+           		'inputs' : self.pressed}
+  
+		await self.GameRoom.send(json.dumps(msg))
+		self.pressed = []
+
 		
 	def render(self): #graphic update
 
