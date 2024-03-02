@@ -16,11 +16,11 @@ def input_handler(core):
 
 async def mouse_handler(core):
 	if core.state == "end":
-		end_input(core)
+		await end_input(core)
 	elif core.state == "menu":
 		await menu_input(core)
 	elif core.pause[0]:
-		pause_input(core)
+		await pause_input(core)
 	elif core.state == "custom":
 		custom_input(core)
 
@@ -29,28 +29,28 @@ def custom_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
 		core.custom_menu.click(core, core.mousePos)
 
-def end_input(core):
+async def end_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
-		core.end.click(core, core.mousePos)
+		await core.end.click(core, core.mousePos)
 
 async def menu_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
 		await core.menu.click(core, core.mousePos)
 
-def pause_input(core):
+async def pause_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
-		core.pause[1].click(core, core.mousePos)
+		await core.pause[1].click(core, core.mousePos)
 
 def	input_handler_1p(core, player):
 	if core.keyboardState[pg.K_UP] or core.keyboardState[pg.K_w]:
-		# player.moveUp(core.walls)
-		core.pressed.append("UP")
+		player.moveUp(core.walls)
+		# core.pressed.append("UP")
 	if core.keyboardState[pg.K_DOWN] or core.keyboardState[pg.K_s]:
-		# player.moveDown(core.walls)
-		core.pressed.append("DOWN")
+		player.moveDown(core.walls)
+		# core.pressed.append("DOWN")
 	if core.keyboardState[pg.K_SPACE] and core.ball.stick == player.nb:
-		core.pressed.append("LAUNCH")
-		# core.ball.launch()
+		# core.pressed.append("LAUNCH")
+		core.ball.launch()
   
 def input_handler_ai(core, ai): # standby, when client version, launch msg to serv
 	if core.keyboardState[pg.K_KP8]:

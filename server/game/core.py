@@ -20,6 +20,7 @@ class Game:
 		self.is_running = True
 		self.start = [3, time.time()]
 		self.pause = False #toujours false ? vu que on peut freeze le jeu uniquement en local game
+		self.hub = False
   
 		##TOUTE LES GAMES INFO #depends on mode
 		self.requiered = 1
@@ -38,6 +39,8 @@ class Game:
 			await client.send(json.dumps(msg))
  
 	async def sendUpdate(self):
+		if not self.is_running:
+			return
 		msg = {'type' : 'update',
          		'pos' : [self.players[0].paddle[0].pos.x, self.players[0].paddle[0].pos.y]}#toutes les infos de jeu #players : [pos....] # ball : [pos]
 		await self.sendAll(msg)
@@ -69,7 +72,8 @@ class Game:
 		update_all(self, delta)
 		
 	def quit(self):
-		sys.exit() #is running -> false
+		self.is_running = False
+		# sys.exit() #is running -> false
 
 
 async def run_game():
@@ -77,11 +81,16 @@ async def run_game():
 	game.state = "start"
 	while game.is_running:
 		game.tick()
+		if not game.is_running:
+			break
 		await game.sendUpdate()
+		if not game.is_running:
+			break
 		await asyncio.sleep(0.01)
 
 
 async def handle_game(websocket, path):
+	global clients
 	global game
 	clients.add(websocket)
 
@@ -95,25 +104,32 @@ async def handle_game(websocket, path):
 
 
 	finally: #send end msg to gamehub (client 0)
-		print("FINNNNALLLLYYYY")
 		game.is_running = False
 		# print(websocket)
 		clients.remove(websocket)
-		if clients.__len__() <= 1:
-			sys.exit()
+		# if clients.__len__() <= 1:
+		# 	return
+			# sys.exit()
 
  
 async def parse_msg(msg : dict, websocket):
 	global game
-	print(msg)
+	print("game", msg)
 	if msg['type'] == 'create': #game creation depending on cmd
 		if msg['cmd'] == 'quickGame':
 			game.mode = msg['mode'] ##only up for solo
 			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
+			game.hub = websocket
 	if msg['type'] == 'join':
 		game.join(websocket)
 	if msg['type'] == 'input' and game.state == 'game':
 		game.input(msg['player'], msg['inputs'])
+	if msg['type'] == 'quitGame':
+		#update les score et les wins/loses celui qui quit perd
+		await game.hub.send(json.dumps({'type' : 'endGame'}))
+		await game.sendAll({'type' : 'endGame'})
+		game.is_running = False
+		await websocket.close()
 	
 
 game = Game()
@@ -122,12 +138,19 @@ args = sys.argv
 clients = set()
 
 async def main():
+	global clients
 	global game
 	if args.__len__() != 3:
 		return
 	game_server = websockets.serve(handle_game, args[1], args[2])
-	await game_server
-	await asyncio.Event().wait()
+	# await game_server
+	# await asyncio.Event().wait()
+
+	server = await game_server
+	if not game.is_running:
+		server.close()
+	await server.wait_closed()
+	# asyncio.get_event_loop().run_until_complete(server.wait_closed())
 
 
 asyncio.run(main())

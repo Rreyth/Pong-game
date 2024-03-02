@@ -37,47 +37,57 @@ async def setValues(name, core):
 	core.custom_mod = False
 	core.obstacle = False
 	if name == "LOCAL":
-		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "local"}
+		msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
 		await core.GameHub.send(json.dumps(msg))
 		response : dict = json.loads(await core.GameHub.recv())
-		print(response)
   
-		# directly wait for game room
-		
-		#waiting screen if response = waiting
-		#wait for game start msg
-		#stock info
-  
-	if name == "SOLO":
-		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "solo"}
-		await core.GameHub.send(json.dumps(msg))
-		response : dict = json.loads(await core.GameHub.recv())
-		if 'socket' in response.keys():
-			core.GameRoom = await websockets.connect(response['socket'])
-			await core.GameRoom.send(json.dumps({'type' : 'join'}))
-			response : dict = json.loads(await core.GameRoom.recv())
-			if response['type'] == 'start':
-				core.state = "launch"
-				core.mode = "solo"
-  
-		# directly wait for game room
-  
-		core.max_score = 5
-		core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
-		core.ai.append(AI(core.players[1]))
+		core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		core.walls = [Wall("up", False), Wall("down", False)]
 		core.ball = Ball(False)
+		core.state = "start"
+		core.mode = "LOCAL"
+  
+	if name == "SOLO":
+		msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
+		await core.GameHub.send(json.dumps(msg))
+		response : dict = json.loads(await core.GameHub.recv())
+		# if 'socket' in response.keys():
+		# 	core.GameRoom = await websockets.connect(response['socket'])
+		# 	await core.GameRoom.send(json.dumps({'type' : 'join'}))
+		# 	response : dict = json.loads(await core.GameRoom.recv())
+		# 	if response['type'] == 'start':
+		# 		core.state = "launch"
+		# 		core.mode = "solo"
+  
+		# directly wait for game room
+  
+		# core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
+		# core.ai.append(AI(core.players[1]))
+		# core.walls = [Wall("up", False), Wall("down", False)]
+		# core.ball = Ball(False)
 		# core.state = "start"
 		# core.mode = "solo"
 	if name == "CUSTOM":
 		core.state = "custom"
 		core.custom_menu = CustomMenu()
 	if name == "ONLINE":
-		msg = {"type" : "quickGame", "cmd" : "join", "mode" : "online"}
+		msg = {"type" : "quickGame", "cmd" : "join", "online" : "true"}
 		await core.GameHub.send(json.dumps(msg))
 		response : dict = json.loads(await core.GameHub.recv())
 		print(response)
-		
+		if 'socket' in response.keys():
+			core.GameRoom = await websockets.connect(response['socket'])
+			await core.GameRoom.send(json.dumps({'type' : 'join'}))
+			response : dict = json.loads(await core.GameRoom.recv())
+			if response['type'] == 'start':
+				core.state = "launch"
+				core.mode = "LOCAL"
+  
+		core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
+		core.walls = [Wall("up", False), Wall("down", False)]
+		core.ball = Ball(False)	
+		core.online = True
+  
 		# go in waiting screen
 
 		#waiting screen if response = waiting

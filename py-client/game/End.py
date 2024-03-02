@@ -51,9 +51,13 @@ class End:
 		for i in range(text.__len__()):
 				win.blit(text[i], pos[i])
   
-	def click(self, core, mousePos):
+	async def click(self, core, mousePos):
 		if self.button.hitbox.collidepoint(mousePos):
 			core.state = "menu"
 			core.mode = "none"
 			core.pause[0] = False
 			core.pause[1].freeze = False
+			if not core.online:
+				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+			else:
+				await core.GameRoom.send(json.dumps({'type' : 'quitGame'}))

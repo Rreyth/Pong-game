@@ -18,7 +18,6 @@ from .StartScreen import *
 
 class Game:
 	def __init__(self): #init class
-		self.is_running = True
 		pg.init()
 		self.state = "menu"
 		self.mode = "none"
@@ -28,8 +27,11 @@ class Game:
 		self.font = pg.font.Font(font, int(textSize))
 		self.ai = []
 		self.pressed = []
+		self.max_score = 10
 
 	def start(self, websocket):
+		self.online = False
+		self.is_running = True
 		self.id = 1
 		self.GameRoom = False
 		self.GameHub = websocket
@@ -61,7 +63,8 @@ class Game:
 		delta = tmp - self.last
 		self.last = tmp
 
-		await self.sendInputs()
+		if self.online:
+			await self.sendInputs()
 
 		update_all(self, delta)
 

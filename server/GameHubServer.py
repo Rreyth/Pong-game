@@ -3,14 +3,23 @@ import websockets
 import json
 import os
 import time
+import random
+import string
+
 
 starting_port = 6670
 
 used_port = []
+used_id = []
 
 fordiben_port = [8000, 8001]
 
 clients = set()
+
+def id_generator():
+	set = string.ascii_uppercase + string.digits
+	id = ''.join(random.choice(set) for i in range(4))
+	return id
 
 async def connection_handler(client_msg, websocket):
 	if client_msg['cmd'] == "username":
@@ -30,27 +39,16 @@ async def handle_quickGame(client_msg, websocket):
 		#close game room
 		await websocket.send(json.dumps({'type' : 'quitWait'}))
 	elif client_msg['cmd'] == 'join':
-		if client_msg['mode'] == 'local':
-			# await websocket.send(json.dumps({'type' : 'starting'}))
-			port = starting_port
-			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
-			used_port.append(port)
-			host = 'localhost'
-			os.system("python3 game/core.py {} {} &".format(host, port))
-			time.sleep(0.1)
-			async with websockets.connect("ws://localhost:6670") as gameSocket:
-				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'local'}
-				await gameSocket.send(json.dumps(msg))
-				response : dict = json.loads(await gameSocket.recv())
-				if response['type'] == 'GameStart':
-					await websocket.send(json.dumps(response))
-				end_msg : dict = json.loads(await gameSocket.recv())
-				while end_msg['type'] != 'endGame':
-					end_msg : dict = json.loads(await gameSocket.recv())
-				#transmet au serv principale les info de endGame ??
+		if client_msg['online'] == 'false': #wait client to play + end game self
+			await websocket.send(json.dumps({'type' : 'starting'}))
+			response : dict = json.loads(await websocket.recv())
+			while response['type'] != 'endGame':
+				response : dict = json.loads(await websocket.recv())
+			print(response)
+			#send it to serv for db stockage
+   
 
-		elif client_msg['mode'] == 'solo':
-			# await websocket.send(json.dumps({'type' : 'starting'}))
+		elif client_msg['online'] == 'true':
 			port = starting_port
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
 			used_port.append(port)
@@ -58,26 +56,23 @@ async def handle_quickGame(client_msg, websocket):
 			os.system("python3 game/core.py {} {} &".format(host, port))
 			time.sleep(0.1)
 			async with websockets.connect("ws://{}:{}".format(host, port)) as gameSocket:
-				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'solo'}
+				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'online'}
 				await gameSocket.send(json.dumps(msg))
 				response : dict = json.loads(await gameSocket.recv())
 				while response['type'] != 'endGame':
+					print('hub', response)
 					if response['type'] == 'CreationSuccess':
-						#generate aleat room id + stock pour eviter les doublons
-						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : '1111', 'socket' : 'ws://{}:{}'.format(host, port)}))
-					# if response['type'] == 'GameStart':
-					# 	await websocket.send(json.dumps(response))
+						room_id = id_generator()
+						used_id.append(room_id)
+						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room_id, 'socket' : 'ws://{}:{}'.format(host, port)}))
+					if response['type'] == 'GameStart':
+						await websocket.send(json.dumps(response))
 					response : dict = json.loads(await gameSocket.recv())
-   
-   
-			#create 1 vs AI room local mode
-			# wait for ready msg from the game ?
-		elif client_msg['mode'] == 'online':
-			await websocket.send(json.dumps({'type' : 'waiting', 'ID' : '1234'}))#Room id gen aleat when openning the room %10000
-			#create 1v1 basic room online mode
-			# wait for ready msg from the game ?
-		# elif custom (plus d'info a gerer)
+				print('hub', response)
+				#when game end close game socket
+				#send it to serv for db stockage
 
+			#create 1v1 basic room online mode
 
 
 async def parse_msg(message, websocket):
@@ -87,6 +82,7 @@ async def parse_msg(message, websocket):
 		await connection_handler(client_msg, websocket)
 	if client_msg["type"] == "quickGame":
 		await handle_quickGame(client_msg, websocket)
+	# elif custom (plus d'info a gerer)
 
 async def handle_client(websocket):
 	clients.add(websocket)

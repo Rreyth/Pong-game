@@ -28,7 +28,8 @@ QUICK GAME:
 	create/join quick game:
 		'type' : 'quickGame'
 		'cmd' : 'join'
-		'mode' : 'local' / 'online'
+		'online' : 'false' / 'true'
+		'mode' : <mode>
 		-> 'type' : 'waiting' if online, if local 'starting'
 		   'RoomId' : <game room id>
 		

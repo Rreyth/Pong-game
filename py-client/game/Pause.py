@@ -17,12 +17,16 @@ class Pause:
 			button.draw(win)
   
 
-	def click(self, core, mousePos):
+	async def click(self, core, mousePos):
 		for button in self.buttons:
 			if button.hitbox.collidepoint(mousePos):
 				if button.name == "BACK TO MENU":
 					core.state = "menu"
 					core.mode = "none"
+					if not core.online:
+						await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+					else:
+						await core.GameRoom.send(json.dumps({'type' : 'quitGame'}))
 				core.pause[0] = False
 				self.freeze = False
      
