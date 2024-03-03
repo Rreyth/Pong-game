@@ -1,7 +1,7 @@
 from .config import *
 
 def render_game(core):
-	core.win.fill((0, 0, 0)) 
+	core.win.fill((0, 0, 0))
 
 	for player in core.players:
 		player.draw(core.win)
@@ -80,7 +80,12 @@ def render_start(core):
 	core.win.blit(alpha_surface, (0, 0))
  
 	core.start_screen.draw(core.win)
- 
+
+def render_wait(core):
+	core.win.fill((0, 0, 0))
+	core.wait_screen.draw(core.win)
+
+
 def render_custom(core):
 	core.win.fill((0, 0, 0))
 	

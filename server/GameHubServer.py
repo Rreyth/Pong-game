@@ -9,6 +9,17 @@ import string
 
 starting_port = 6670
 
+class Room:
+	def __init__(self, id, host, port, type, websocket):
+		self.websocket = websocket
+		self.id = id
+		self.host = host
+		self.port = port
+		self.full = False
+		self.type = type
+
+rooms = {}
+
 used_port = []
 used_id = []
 
@@ -19,6 +30,8 @@ clients = set()
 def id_generator():
 	set = string.ascii_uppercase + string.digits
 	id = ''.join(random.choice(set) for i in range(4))
+	while id in used_id:
+		id = ''.join(random.choice(set) for i in range(4))
 	return id
 
 async def connection_handler(client_msg, websocket):
@@ -35,6 +48,7 @@ async def connection_handler(client_msg, websocket):
 	
 
 async def handle_quickGame(client_msg, websocket):
+	global rooms, used_port, used_id
 	if client_msg['cmd'] == 'quit':
 		#close game room
 		await websocket.send(json.dumps({'type' : 'quitWait'}))
@@ -49,6 +63,25 @@ async def handle_quickGame(client_msg, websocket):
    
 
 		elif client_msg['online'] == 'true':
+			for room in rooms.values():
+				if not room.full and room.type == 'quickGame':
+					await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room.id, 'socket' : 'ws://{}:{}'.format(room.host, room.port)}))
+					try:
+						async for message in room.websocket:
+							if response['type'] == 'Full':
+								room.full = True
+							if message['type'] == 'endGame':
+								used_port.remove(room.port)
+								used_id.remove(room.id)
+								await room.websocket.close()
+								rooms.pop(room.id)
+								return
+					finally:
+						used_port.remove(room.port)
+						used_id.remove(room.id)
+						rooms.pop(room.id)
+						return
+
 			port = starting_port
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
 			used_port.append(port)
@@ -56,19 +89,22 @@ async def handle_quickGame(client_msg, websocket):
 			os.system("python3 game/core.py {} {} &".format(host, port))
 			time.sleep(0.1)
 			async with websockets.connect("ws://{}:{}".format(host, port)) as gameSocket:
-				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'online'}
+				room_id = id_generator()
+				used_id.append(room_id)
+				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'online', 'Room_id' : room_id}
 				await gameSocket.send(json.dumps(msg))
 				response : dict = json.loads(await gameSocket.recv())
 				while response['type'] != 'endGame':
 					print('hub', response)
 					if response['type'] == 'CreationSuccess':
-						room_id = id_generator()
-						used_id.append(room_id)
+						rooms[room_id] = Room(room_id, host, port, 'quickGame', gameSocket)
 						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room_id, 'socket' : 'ws://{}:{}'.format(host, port)}))
-					if response['type'] == 'GameStart':
-						await websocket.send(json.dumps(response))
+
 					response : dict = json.loads(await gameSocket.recv())
-				print('hub', response)
+				await gameSocket.close()
+				used_port.remove(port)
+				used_id.remove(room_id)
+				rooms.pop(room_id)
 				#when game end close game socket
 				#send it to serv for db stockage
 

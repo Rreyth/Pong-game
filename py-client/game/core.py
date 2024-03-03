@@ -30,9 +30,10 @@ class Game:
 		self.max_score = 10
 
 	def start(self, websocket):
+		self.full = False
 		self.online = False
 		self.is_running = True
-		self.id = 1
+		self.id = 0
 		self.GameRoom = False
 		self.GameHub = websocket
 		self.winSize = [winWidth, winHeight]
@@ -82,6 +83,8 @@ class Game:
 		
 	def render(self): #graphic update
 
+		if self.state == "waiting":
+			render_wait(self)
 		if self.state == "start":
 			render_start(self)
 		elif self.state == "end":
@@ -97,6 +100,6 @@ class Game:
 
 		pg.display.update() #call to update render
 		
-	def quit(self):
+	def quit(self): #send endGame with end infos
 		pg.quit()
 		self.is_running = False

@@ -4,6 +4,7 @@ from random import randint
 
 class Ball:
 	def __init__(self, borderless):
+		self.speed = 0
 		self.borderless = borderless
 		self.radius = 7
 		self.center = [Vec2(winWidth / 2, winHeight / 2)]

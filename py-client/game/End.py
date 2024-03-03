@@ -44,7 +44,6 @@ class End:
 		self.button.draw(win)
 
 	def drawSquare(self, core, win):
-		pass
 		text = []
 		pos = []
 

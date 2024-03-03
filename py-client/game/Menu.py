@@ -3,6 +3,7 @@ from .Player import *
 from .Wall import *
 from .Ball import *
 from .StartScreen import *
+from .WaitScreen import *
 from .Pause import *
 from .AI import *
 from .Custom import *
@@ -79,10 +80,13 @@ async def setValues(name, core):
 			core.GameRoom = await websockets.connect(response['socket'])
 			await core.GameRoom.send(json.dumps({'type' : 'join'}))
 			response : dict = json.loads(await core.GameRoom.recv())
-			if response['type'] == 'start':
+			print(response)
+			if response['type'] == 'start': #add game infos ? player id ? etc...
+				room_id = response['Room_id']
+				core.id = response['id']
 				core.state = "launch"
-				core.mode = "LOCAL"
-  
+				core.mode = "ONLINE"
+	
 		core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		core.walls = [Wall("up", False), Wall("down", False)]
 		core.ball = Ball(False)	
@@ -95,6 +99,8 @@ async def setValues(name, core):
 		#stock info
 	if core.mode != "none":
 		core.start_screen = StartScreen(core.mode)
+		if core.online:
+			core.wait_screen = WaitScreen(room_id, core.id, core.players.__len__(), "QuickGame Online")
 
 
 

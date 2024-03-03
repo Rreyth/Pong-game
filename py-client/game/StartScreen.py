@@ -6,7 +6,6 @@ from .Button import *
  #adapt to nb players
 class StartScreen:
 	def __init__(self, mode):
-		self.state = True
 		self.mode = mode
 		self.timer = 3
 		self.time = time.time()

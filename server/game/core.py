@@ -12,22 +12,23 @@ from update import *
 class Game:
 	def __init__(self): #init class
 		self.winSize = [winWidth, winHeight]
-		self.fps = 120
+		# self.fps = 120
 		self.last = time.time()
 		self.state = "wait"
 		self.mode = "none"
 		self.clients = set()
 		self.is_running = True
-		self.start = [3, time.time()]
+		self.start = [4, time.time()]
 		self.pause = False #toujours false ? vu que on peut freeze le jeu uniquement en local game
 		self.hub = False
+		self.id = 0
   
 		##TOUTE LES GAMES INFO #depends on mode
-		self.requiered = 1
+		self.requiered = 2
 		self.ball = Ball(False)
-		self.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
+		self.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		self.ai = []
-		self.max_score = 5
+		self.max_score = 10
 		self.walls = [Wall("up", False), Wall("down", False)]
 		self.obstacle = False
 		self.custom_mod = False
@@ -42,13 +43,20 @@ class Game:
 		if not self.is_running:
 			return
 		msg = {'type' : 'update',
-         		'pos' : [self.players[0].paddle[0].pos.x, self.players[0].paddle[0].pos.y]}#toutes les infos de jeu #players : [pos....] # ball : [pos]
+         		'players' : [[player.paddle[0].pos.x, player.paddle[0].pos.y] for player in self.players],
+		 		'ball' : [self.ball.center[0].x, self.ball.center[0].y, self.ball.stick, self.ball.speed, self.ball.dir],
+     			'score' : [player.score for player in self.players]}
 		await self.sendAll(msg)
  
-	def join(self, websocket):
+	async def join(self, websocket):
+		await self.sendAll({'type' : 'join'})
 		self.clients.add(websocket)
+		await websocket.send(json.dumps({'type' : 'start', 'id' : self.clients.__len__(), 'Room_id' : self.id}))
 		if self.clients.__len__() == self.requiered:
 			self.state = 'ready'
+			await self.hub.send(json.dumps({'type' : 'Full'}))
+		await websocket.send(json.dumps({'type' : 'waiting'}))
+
 			
 	def input(self, player_id, inputs):
 		for input in inputs:
@@ -99,7 +107,6 @@ async def handle_game(websocket, path):
 			await parse_msg(json.loads(message), websocket)
 			if game.state == 'ready':
 				await game.sendAll({'type' : 'start'})
-				await game.sendAll({'type' : 'start'})
 				asyncio.create_task(run_game())
 
 
@@ -117,11 +124,12 @@ async def parse_msg(msg : dict, websocket):
 	print("game", msg)
 	if msg['type'] == 'create': #game creation depending on cmd
 		if msg['cmd'] == 'quickGame':
-			game.mode = msg['mode'] ##only up for solo
+			game.mode = msg['mode']
+			game.id = msg['Room_id']
 			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
 			game.hub = websocket
 	if msg['type'] == 'join':
-		game.join(websocket)
+		await game.join(websocket)
 	if msg['type'] == 'input' and game.state == 'game':
 		game.input(msg['player'], msg['inputs'])
 	if msg['type'] == 'quitGame':
@@ -130,6 +138,7 @@ async def parse_msg(msg : dict, websocket):
 		await game.sendAll({'type' : 'endGame'})
 		game.is_running = False
 		await websocket.close()
+		sys.exit()
 	
 
 game = Game()

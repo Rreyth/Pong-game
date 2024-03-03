@@ -1,17 +1,35 @@
 from .config import *
 
+def online_input(core):
+	if core.state == "game":
+		if core.players[core.id - 1].side == "left" or core.players[core.id - 1].side == "right":
+			if core.keyboardState[pg.K_UP] or core.keyboardState[pg.K_w]:
+				core.pressed.append("UP")
+			if core.keyboardState[pg.K_DOWN] or core.keyboardState[pg.K_s]:
+				core.pressed.append("DOWN")
+		if core.players[core.id - 1].side == "up" or core.players[core.id - 1].side == "down":
+			if core.keyboardState[pg.K_LEFT] or core.keyboardState[pg.K_a]:
+				core.pressed.append("LEFT")
+			if core.keyboardState[pg.K_RIGHT] or core.keyboardState[pg.K_d]:
+				core.pressed.append("RIGHT")
+		if core.keyboardState[pg.K_SPACE] and core.ball.stick == core.id:
+			core.pressed.append("LAUNCH")
+
 def input_handler(core):
-	if core.state == "game" and not core.pause[0]:
-		if core.mode == "LOCAL":
-			if core.players.__len__() == 2:
-				input_handler_2p(core, core.players)
-			elif core.custom_mod == "1V1V1V1":
-				input_handler_square(core, core.players)
-			elif core.players.__len__() == 4: #modif pour ia 
-				input_handler_4p(core, core.players)
-		elif core.mode == "solo":
-			input_handler_1p(core, core.players[0])
-			input_handler_ai(core, core.players[1])
+	if core.online:
+		online_input(core)
+	else:
+		if core.state == "game" and not core.pause[0]:
+			if core.mode == "LOCAL":
+				if core.players.__len__() == 2:
+					input_handler_2p(core, core.players)
+				elif core.custom_mod == "1V1V1V1":
+					input_handler_square(core, core.players)
+				elif core.players.__len__() == 4: #modif pour ia 
+					input_handler_4p(core, core.players)
+			elif core.mode == "solo":
+				input_handler_1p(core, core.players[0])
+				input_handler_ai(core, core.players[1])
 	
 
 async def mouse_handler(core):
@@ -23,6 +41,9 @@ async def mouse_handler(core):
 		await pause_input(core)
 	elif core.state == "custom":
 		custom_input(core)
+	elif core.state == 'waiting':
+		if core.mouseState[0] and pg.mouse.get_focused():
+			await core.wait_screen.click(core, core.mousePos)
 
 
 def custom_input(core):
@@ -44,12 +65,9 @@ async def pause_input(core):
 def	input_handler_1p(core, player):
 	if core.keyboardState[pg.K_UP] or core.keyboardState[pg.K_w]:
 		player.moveUp(core.walls)
-		# core.pressed.append("UP")
 	if core.keyboardState[pg.K_DOWN] or core.keyboardState[pg.K_s]:
 		player.moveDown(core.walls)
-		# core.pressed.append("DOWN")
 	if core.keyboardState[pg.K_SPACE] and core.ball.stick == player.nb:
-		# core.pressed.append("LAUNCH")
 		core.ball.launch()
   
 def input_handler_ai(core, ai): # standby, when client version, launch msg to serv
@@ -127,7 +145,7 @@ def escape_handler(core):
 		core.quit()
 	if core.state == "game":
 		core.pause[0] = not core.pause[0]
-		if core.mode != "ONLINE" and core.pause[0]:
+		if not core.online and core.pause[0]:
 			core.pause[1].freeze = True
 		else:
 			core.pause[1].freeze = False

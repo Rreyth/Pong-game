@@ -21,11 +21,27 @@ async def try_connect(websocket):
 
 async def parse_msg(msg : dict, websocket):#todo
 	global game
+ 
+	if msg['type'] == 'join':
+		game.wait_screen.nb += 1
+ 
+	if msg['type'] == 'start':
+		game.state = 'start'
+		print(game.id, game.players.__len__())
+		if game.id != game.players.__len__():
+			game.start_screen.timer = 4
+
 	if msg['type'] == 'update':
-		game.players[0].paddle[0].pos = Vec2(pos=msg['pos'])
+		for i in range(game.players.__len__()):
+			game.players[i].paddle[0].pos = Vec2(pos=msg['players'][i])
+			game.players[i].score = msg['score'][i]
+		game.ball.center[0] = Vec2(msg['ball'][0], msg['ball'][1])
+		game.ball.stick = msg['ball'][2]
+		game.ball.speed = msg['ball'][3]
+		game.ball.dir = msg['ball'][4]
+
 	if msg['type'] == 'endGame':
 		game.is_running = False
-		print('here', msg)
 		# if game.GameRoom:
 		# 	await game.GameRoom.close()
 
@@ -64,7 +80,7 @@ async def in_game(websocket):
 			async for message in game.GameRoom:
 				await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
 				if game.state == 'launch':
-					game.state = 'start'
+					game.state = 'waiting'
 					asyncio.create_task(run_game())
 
 		finally:
