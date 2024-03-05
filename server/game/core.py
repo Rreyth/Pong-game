@@ -24,7 +24,7 @@ class Game:
 		self.id = 0
   
 		##TOUTE LES GAMES INFO #depends on mode
-		self.requiered = 3
+		self.requiered = 2
 		self.ball = Ball(False)
 		self.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		self.ai = []
@@ -128,7 +128,7 @@ async def handle_game(websocket, path):
  
 async def parse_msg(msg : dict, websocket):
 	global game
-	if msg['type'] == 'create': #game creation depending on cmd
+	if msg['type'] == 'create' and not game.hub: #game creation depending on cmd
 		if msg['cmd'] == 'quickGame':
 			game.mode = msg['mode']
 			game.id = msg['Room_id']
@@ -152,6 +152,9 @@ async def parse_msg(msg : dict, websocket):
 			game.is_running = False
 			await websocket.close()
 		# sys.exit()
+	if msg['type'] == 'close':
+		game.is_running = False
+		await websocket.close()
 	
 
 game = Game()

@@ -52,15 +52,16 @@ class Menu:
 			if response['success'] == 'false':
 				self.err = "Room " + self.buttons[5].name + " doesn't exist"
 			else:
-				core.GameRoom = await websockets.connect(response['socket'])
-				await core.GameRoom.send(json.dumps({'type' : 'join'}))
-				response : dict = json.loads(await core.GameRoom.recv())
-				print(response)
-				if response['type'] == 'start': #add game infos ? player id ? etc...
-					room_id = response['Room_id']
-					core.id = response['id']
-					core.state = "launch"
-					core.mode = "ONLINE"
+				# core.GameRoom = await websockets.connect(response['socket'])
+				# await core.GameRoom.send(json.dumps({'type' : 'join'}))
+				# response : dict = json.loads(await core.GameRoom.recv())
+				# print(response)
+				# if response['type'] == 'start': #add game infos ? player id ? etc...
+				core.GameSocket = response['socket']
+				room_id = self.buttons[5].name
+				core.id = response['pos']
+				core.state = "waiting"
+				core.mode = "ONLINE"
 				core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 				core.walls = [Wall("up", False), Wall("down", False)]
 				core.ball = Ball(False)	
@@ -109,15 +110,18 @@ class Menu:
 			response : dict = json.loads(await core.GameHub.recv())
 			print(response)
 			if 'socket' in response.keys():
-				core.GameRoom = await websockets.connect(response['socket'])
-				await core.GameRoom.send(json.dumps({'type' : 'join'}))
-				response : dict = json.loads(await core.GameRoom.recv())
-				print(response)
-				if response['type'] == 'start': #add game infos ? player id ? etc...
-					room_id = response['Room_id']
-					core.id = response['id']
-					core.state = "launch"
-					core.mode = "ONLINE"
+				core.GameSocket = response['socket']
+				room_id = response['ID']
+				core.state = "waiting"
+				core.mode = "ONLINE"
+				core.id = response['pos']
+				# core.GameRoom = await websockets.connect(response['socket'])
+				# await core.GameRoom.send(json.dumps({'type' : 'join'}))
+				# response : dict = json.loads(await core.GameRoom.recv())
+				# print(response)
+				# if response['type'] == 'start': #add game infos ? player id ? etc...
+				# 	room_id = response['Room_id']
+				# 	core.state = "launch"
 		
 			core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 			core.walls = [Wall("up", False), Wall("down", False)]

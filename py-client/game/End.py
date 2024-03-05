@@ -56,7 +56,7 @@ class End:
 			core.mode = "none"
 			core.pause[0] = False
 			core.pause[1].freeze = False
-			if not core.online:
-				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
-			else:
-				await core.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : core.id}))
+			# if not core.online:
+			await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+			# else:
+			# 	await core.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : core.id}))

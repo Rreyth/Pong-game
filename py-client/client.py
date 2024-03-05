@@ -46,7 +46,10 @@ async def parse_msg(msg : dict, websocket):#todo
 				game.is_running = False
 				if game.GameRoom:
 					await game.GameRoom.close()
+					game.GameRoom = False
 			else:
+				if game.id > msg['id']:
+					game.id -= 1
 				game.wait_screen.nb -= 1
 			return
 		for i in range(game.players.__len__()):
@@ -57,6 +60,7 @@ async def parse_msg(msg : dict, websocket):#todo
 			game.state = 'end'
 		if game.GameRoom:
 			await game.GameRoom.close()
+			game.GameRoom = False
 
 async def run_game():
 	global game
@@ -83,17 +87,46 @@ async def local_run():
 		game.render()
 		await asyncio.sleep(0.01)
 
+
+async def wait_loop():
+	global game
+	game.render()
+	
+	msg = {'type' : 'none'}
+	while game.is_running and msg['type'] != 'start':
+		await parse_msg(msg, game.GameHub)
+		await game.input()
+		if not game.is_running:
+			break
+		await game.tick()
+		game.render()
+		await asyncio.sleep(0.01)
+		try:
+			msg :dict = json.loads(await asyncio.wait_for(game.GameHub.recv(), timeout=0.01))
+		except asyncio.TimeoutError:
+			msg = {'type' : 'none'}
+	if game.is_running:
+		game.GameRoom = await websockets.connect(game.GameSocket)
+		await game.GameRoom.send(json.dumps({'type' : 'join'}))
+		msg : dict = json.loads(await game.GameRoom.recv())
+		game.id = msg['id']
+		game.state = 'launch'
+	
+
 async def in_game(websocket):
 	global game
 	game.start(websocket)
 	await local_run()
+	if game.is_running:
+		await wait_loop()
 	if game.online:
 		try:
-			async for message in game.GameRoom:
-				await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
-				if game.state == 'launch':
-					game.state = 'waiting'
-					asyncio.create_task(run_game())
+			if game.GameRoom:
+				async for message in game.GameRoom:
+					await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
+					if game.state == 'launch':
+						game.state = 'waiting'
+						asyncio.create_task(run_game())
 
 		finally:
 			game.is_running = False
