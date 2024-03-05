@@ -2,7 +2,7 @@ from config import *
 from AI import *
 from Ball import *
 
-def update_all(core, delta):
+async def update_all(core, delta):
 	if core.state == "game" and not core.pause:
 
 		core.ball.update(core, delta)
@@ -17,6 +17,10 @@ def update_all(core, delta):
 				core.state = "end"
 				player.win = "WIN"
 			player.speed = player.speed_per_sec * delta
+		if core.state == "end":
+			await core.hub.send(json.dumps(core.endMsg(0)))
+			await core.sendAll(core.endMsg(0))
+			core.is_running = False
 	if core.state == "start":
 		tmp = time.time()
 		d = tmp - core.start[1]
@@ -25,3 +29,4 @@ def update_all(core, delta):
 			core.start[0] -= 1
 		if core.start[0] == 0:
 			core.state = "game"
+

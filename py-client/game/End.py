@@ -59,4 +59,4 @@ class End:
 			if not core.online:
 				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 			else:
-				await core.GameRoom.send(json.dumps({'type' : 'quitGame'}))
+				await core.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : core.id}))

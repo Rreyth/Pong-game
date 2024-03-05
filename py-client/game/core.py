@@ -27,10 +27,10 @@ class Game:
 		self.font = pg.font.Font(font, int(textSize))
 		self.ai = []
 		self.pressed = []
-		self.max_score = 10
+		self.max_score = 2
 
 	def start(self, websocket):
-		self.full = False
+		# self.full = False
 		self.online = False
 		self.is_running = True
 		self.id = 0
@@ -44,9 +44,11 @@ class Game:
 	async def input(self): #catch user input
 		for event in pg.event.get():
 			if event.type == pg.QUIT: #event click on cross
-				self.quit()
+				await self.quit()
 			if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
-				escape_handler(self)
+				await escape_handler(self)
+			if event.type == pg.KEYDOWN and self.menu.buttons[5].highlight:
+				await input_id(self, self.menu.buttons[5], event.key, event.unicode)
 			if event.type == pg.MOUSEBUTTONDOWN:
 				self.mouseState = pg.mouse.get_pressed()
 				self.mousePos = pg.mouse.get_pos()
@@ -67,7 +69,7 @@ class Game:
 		if self.online:
 			await self.sendInputs()
 
-		update_all(self, delta)
+		await update_all(self, delta)
 
 	async def sendInputs(self):
 		if self.pressed.__len__() == 0:
@@ -100,6 +102,15 @@ class Game:
 
 		pg.display.update() #call to update render
 		
-	def quit(self): #send endGame with end infos
+	async def quit(self): #send endGame with end infos
 		pg.quit()
+		self.state = "quit"
+		if self.is_running:
+			if not self.online:
+				await self.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+			else:
+				if self.state == 'waiting':
+					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id, 'cmd' : 'quitWait'}))
+				else:
+					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))
 		self.is_running = False

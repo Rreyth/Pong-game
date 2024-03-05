@@ -46,6 +46,35 @@ async def connection_handler(client_msg, websocket):
 	#if client_msg['cmd'] == "token":
 		#same same but different
 	
+async def handle_join(client_msg, websocket):
+	global rooms, used_port, used_id
+	if client_msg['id'] not in used_id:
+		await websocket.send(json.dumps({'type' : 'joinResponse', 'success' : 'false'}))
+		return
+
+	for room in rooms.values():
+		if room.id == client_msg['id']:
+			await websocket.send(json.dumps({'type' : 'joinResponse', 'success' : 'true', 'socket' : 'ws://{}:{}'.format(room.host, room.port)}))
+			async with websockets.connect("ws://{}:{}".format(room.host, room.port)) as gameSocket:
+				try:
+					async for message in gameSocket:
+						if message['type'] == 'Full':
+							room.full = True
+						if message['type'] == 'endGame':
+							print(message)
+							if 'cmd' in message.keys() and message['cmd'] == 'quitWait' and message['nb'] > 1:
+								return
+							used_port.remove(room.port)
+							used_id.remove(room.id)
+							# await gameSocket.close()
+							rooms.pop(room.id)
+							return
+				finally:
+					if room.port in used_port:
+						used_port.remove(room.port)
+						used_id.remove(room.id)
+						rooms.pop(room.id)
+					return
 
 async def handle_quickGame(client_msg, websocket):
 	global rooms, used_port, used_id
@@ -65,22 +94,27 @@ async def handle_quickGame(client_msg, websocket):
 		elif client_msg['online'] == 'true':
 			for room in rooms.values():
 				if not room.full and room.type == 'quickGame':
-					await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room.id, 'socket' : 'ws://{}:{}'.format(room.host, room.port)}))
-					try:
-						async for message in room.websocket:
-							if response['type'] == 'Full':
-								room.full = True
-							if message['type'] == 'endGame':
+					async with websockets.connect("ws://{}:{}".format(room.host, room.port)) as gameSocket:
+						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room.id, 'socket' : 'ws://{}:{}'.format(room.host, room.port)}))
+						try:
+							async for message in gameSocket:
+								if message['type'] == 'Full':
+									room.full = True
+								if message['type'] == 'endGame':
+									print(message)
+									if 'cmd' in message.keys() and message['cmd'] == 'quitWait' and message['nb'] > 1:
+										return
+									used_port.remove(room.port)
+									used_id.remove(room.id)
+									# await gameSocket.close()
+									rooms.pop(room.id)
+									return
+						finally:
+							if room.port in used_port:
 								used_port.remove(room.port)
 								used_id.remove(room.id)
-								await room.websocket.close()
 								rooms.pop(room.id)
-								return
-					finally:
-						used_port.remove(room.port)
-						used_id.remove(room.id)
-						rooms.pop(room.id)
-						return
+							return
 
 			port = starting_port
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
@@ -101,10 +135,14 @@ async def handle_quickGame(client_msg, websocket):
 						await websocket.send(json.dumps({'type' : 'GameRoom', 'ID' : room_id, 'socket' : 'ws://{}:{}'.format(host, port)}))
 
 					response : dict = json.loads(await gameSocket.recv())
-				await gameSocket.close()
-				used_port.remove(port)
-				used_id.remove(room_id)
-				rooms.pop(room_id)
+				print(response)
+				if 'cmd' in response.keys() and response['cmd'] == 'quitWait' and response['nb'] > 1:
+					return
+				# await gameSocket.close()
+				if port in used_port:
+					used_port.remove(port)
+					used_id.remove(room_id)
+					rooms.pop(room_id)
 				#when game end close game socket
 				#send it to serv for db stockage
 
@@ -118,6 +156,8 @@ async def parse_msg(message, websocket):
 		await connection_handler(client_msg, websocket)
 	if client_msg["type"] == "quickGame":
 		await handle_quickGame(client_msg, websocket)
+	if client_msg["type"] == "join":
+		await handle_join(client_msg, websocket)
 	# elif custom (plus d'info a gerer)
 
 async def handle_client(websocket):

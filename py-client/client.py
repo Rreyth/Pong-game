@@ -27,7 +27,6 @@ async def parse_msg(msg : dict, websocket):#todo
  
 	if msg['type'] == 'start':
 		game.state = 'start'
-		print(game.id, game.players.__len__())
 		if game.id != game.players.__len__():
 			game.start_screen.timer = 4
 
@@ -41,10 +40,23 @@ async def parse_msg(msg : dict, websocket):#todo
 		game.ball.dir = msg['ball'][4]
 
 	if msg['type'] == 'endGame':
+		if 'cmd' in msg.keys() and msg['cmd'] == 'quitWait':
+			if msg['id'] == game.id:
+				game.state = 'menu'
+				game.is_running = False
+				if game.GameRoom:
+					await game.GameRoom.close()
+			else:
+				game.wait_screen.nb -= 1
+			return
+		for i in range(game.players.__len__()):
+			game.players[i].score = msg['score'][i]
+			game.players[i].win = msg['win'][i]
 		game.is_running = False
-		# if game.GameRoom:
-		# 	await game.GameRoom.close()
-
+		if game.state != 'menu' and game.state != 'quit':
+			game.state = 'end'
+		if game.GameRoom:
+			await game.GameRoom.close()
 
 async def run_game():
 	global game
@@ -87,7 +99,7 @@ async def in_game(websocket):
 			game.is_running = False
 			if game.GameRoom:
 				await game.GameRoom.close()
-			if game.state == 'menu':
+			if game.state == 'menu' or game.state == 'end':
 				await in_game(websocket)
 
 

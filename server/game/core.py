@@ -24,17 +24,25 @@ class Game:
 		self.id = 0
   
 		##TOUTE LES GAMES INFO #depends on mode
-		self.requiered = 2
+		self.requiered = 3
 		self.ball = Ball(False)
 		self.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		self.ai = []
-		self.max_score = 10
+		self.max_score = 2
 		self.walls = [Wall("up", False), Wall("down", False)]
 		self.obstacle = False
 		self.custom_mod = False
         ##
         
-	
+	def endMsg(self, id):
+		msg = {'type' : 'endGame'}
+		if id != 0:
+			for player in self.players:
+				player.win = 'LOSE' if player.nb == id else 'WIN'
+		msg['score'] = [player.score for player in self.players]
+		msg['win'] = [player.win for player in self.players]
+		return msg
+ 
 	async def sendAll(self, msg : dict):
 		for client in self.clients:
 			await client.send(json.dumps(msg))
@@ -72,12 +80,12 @@ class Game:
 				self.ball.launch()
 
 		
-	def tick(self): #calcul method
+	async def tick(self): #calcul method
 		tmp = time.time()
 		delta = tmp - self.last
 		self.last = tmp
 
-		update_all(self, delta)
+		await update_all(self, delta)
 		
 	def quit(self):
 		self.is_running = False
@@ -88,7 +96,7 @@ async def run_game():
 	global game
 	game.state = "start"
 	while game.is_running:
-		game.tick()
+		await game.tick()
 		if not game.is_running:
 			break
 		await game.sendUpdate()
@@ -114,14 +122,12 @@ async def handle_game(websocket, path):
 		game.is_running = False
 		# print(websocket)
 		clients.remove(websocket)
-		# if clients.__len__() <= 1:
-		# 	return
-			# sys.exit()
+		if clients.__len__() == 0:
+			sys.exit()
 
  
 async def parse_msg(msg : dict, websocket):
 	global game
-	print("game", msg)
 	if msg['type'] == 'create': #game creation depending on cmd
 		if msg['cmd'] == 'quickGame':
 			game.mode = msg['mode']
@@ -133,12 +139,19 @@ async def parse_msg(msg : dict, websocket):
 	if msg['type'] == 'input' and game.state == 'game':
 		game.input(msg['player'], msg['inputs'])
 	if msg['type'] == 'quitGame':
-		#update les score et les wins/loses celui qui quit perd
-		await game.hub.send(json.dumps({'type' : 'endGame'}))
-		await game.sendAll({'type' : 'endGame'})
-		game.is_running = False
-		await websocket.close()
-		sys.exit()
+		if 'cmd' in msg.keys() and msg['cmd'] == 'quitWait':
+			await game.hub.send(json.dumps({'type' : 'endGame', 'cmd' : 'quitWait', 'nb' : game.clients.__len__(), 'id' : msg['id']}))
+			await game.sendAll({'type' : 'endGame', 'cmd' : 'quitWait', 'id': msg['id']})
+			await websocket.close()
+			game.clients.remove(websocket)
+			if game.clients.__len__() == 0:
+				game.is_running = False
+		else:
+			await game.hub.send(json.dumps(game.endMsg(msg['id'])))
+			await game.sendAll(game.endMsg(msg['id']))
+			game.is_running = False
+			await websocket.close()
+		# sys.exit()
 	
 
 game = Game()
@@ -152,13 +165,13 @@ async def main():
 	if args.__len__() != 3:
 		return
 	game_server = websockets.serve(handle_game, args[1], args[2])
-	# await game_server
-	# await asyncio.Event().wait()
+	await game_server
+	await asyncio.Event().wait()
 
-	server = await game_server
-	if not game.is_running:
-		server.close()
-	await server.wait_closed()
+	# server = await game_server
+	# if not game.is_running:
+	# 	server.close()
+	# await server.wait_closed()
 	# asyncio.get_event_loop().run_until_complete(server.wait_closed())
 
 

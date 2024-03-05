@@ -9,7 +9,7 @@ class Player:
 		self.speed = self.speed_per_sec * 0.005
 		self.nb = nb
 		self.name = name
-		self.win = "LOOSE"
+		self.win = "LOSE"
 		self.score = 0
 		self.initPaddle(nb_total, borderless, square)
 		

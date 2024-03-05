@@ -1,4 +1,14 @@
 from .config import *
+import string
+
+async def input_id(core, button, key, code):
+	set = string.ascii_letters + string.digits
+	if code in set and button.name.__len__() < 4:
+		button.name += code.upper()
+	elif key == pg.K_BACKSPACE:
+		button.name = button.name[:-1]
+	elif key == pg.K_RETURN or key == pg.K_KP_ENTER:
+		await core.menu.setValues("JOIN", core)
 
 def online_input(core):
 	if core.state == "game":
@@ -140,9 +150,9 @@ def input_handler_square(core, players):
 	if core.keyboardState[pg.K_o] and core.ball.stick == 4:
 		core.ball.launch()
 
-def escape_handler(core):
+async def escape_handler(core):
 	if core.state == "menu" or core.state == "end":
-		core.quit()
+		await core.quit()
 	if core.state == "game":
 		core.pause[0] = not core.pause[0]
 		if not core.online and core.pause[0]:
