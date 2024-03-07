@@ -32,6 +32,7 @@ async def parse_msg(msg : dict, websocket):#todo
 		if 'timer' in msg.keys():
 			game.start_screen.timer = msg['timer']
 		else:
+			game.state = 'game'
 			for i in range(game.players.__len__()):
 				game.players[i].paddle[0].pos = Vec2(pos=msg['players'][i])
 				game.players[i].score = msg['score'][i]
@@ -85,6 +86,8 @@ async def local_run():
 		if not game.is_running and not game.online:
 			break
 		await game.tick()
+		if not game.is_running and not game.online:
+			break
 		game.render()
 		await asyncio.sleep(0.01)
 
@@ -111,6 +114,13 @@ async def wait_loop():
 		await game.GameRoom.send(json.dumps({'type' : 'join'}))
 		msg : dict = json.loads(await game.GameRoom.recv())
 		game.id = msg['id']
+		game.players = []
+		game.walls = []
+		for player in msg['players']:
+			game.players.append(Player(player[0], player[1], player[2], player[3], player[4]))
+		for wall in msg['walls']:
+			game.walls.append(Wall(wall[0], wall[1]))
+		game.ball = Ball(msg['ball'])
 		game.state = 'launch'
 	
 

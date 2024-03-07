@@ -5,11 +5,13 @@ from Hitbox import *
 class Player:
 	def __init__(self, nb, name, nb_total, borderless, square):
 		self.borderless = borderless
+		self.nb_total = nb_total
+		self.square = square
 		self.speed_per_sec = speed_per_sec
 		self.speed = self.speed_per_sec * 0.005
 		self.nb = nb
 		self.name = name
-		self.win = "LOOSE"
+		self.win = "LOSE"
 		self.score = 0
 		self.initPaddle(nb_total, borderless, square)
 		

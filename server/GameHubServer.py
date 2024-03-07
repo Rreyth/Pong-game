@@ -17,6 +17,7 @@ class Room:
 		self.port = port
 		self.full = False
 		self.type = type
+		self.mods = []
 		self.max_players = max_players
 		self.players = set()
   
@@ -88,7 +89,7 @@ async def run_game(id, websocket):
 	for room in rooms.values():
 		if room.id == id:
 			async with websockets.connect("ws://{}:{}".format(room.host, room.port)) as gameSocket:
-				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'online', 'Room_id' : room.id}
+				msg = {'type' : 'create', 'cmd' : room.type, 'mods' : room.mods, 'Room_id' : room.id}
 				await gameSocket.send(json.dumps(msg))
 				await websocket.send(json.dumps({'type' : 'start'}))
 				try:

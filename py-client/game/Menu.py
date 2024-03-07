@@ -123,10 +123,11 @@ class Menu:
 				# 	room_id = response['Room_id']
 				# 	core.state = "launch"
 		
-			core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
-			core.walls = [Wall("up", False), Wall("down", False)]
-			core.ball = Ball(False)	
+			# core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
+			# core.walls = [Wall("up", False), Wall("down", False)]
+			# core.ball = Ball(False)
 			core.online = True
+			wait_nb = 2
 	
 			# go in waiting screen
 
@@ -138,7 +139,7 @@ class Menu:
 			self.err = False
 			core.start_screen = StartScreen(core.mode)
 			if core.online:
-				core.wait_screen = WaitScreen(room_id, core.id, core.players.__len__(), "QuickGame Online")
+				core.wait_screen = WaitScreen(room_id, core.id, wait_nb, "QuickGame Online")
 
 
 

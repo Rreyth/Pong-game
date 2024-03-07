@@ -6,6 +6,7 @@ class Wall:
 	def __init__(self, pos, square):
 		self.size = [winWidth ,5]
 		self.pos = pos
+		self.square = square
 
 		if not square:
 			if pos == "up":

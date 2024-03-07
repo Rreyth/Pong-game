@@ -19,6 +19,7 @@ async def update_all(core, delta):
 				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 			player.speed = player.speed_per_sec * delta
 	if core.state == "start":
-		core.start_screen.update()
+		if not core.online:
+			core.start_screen.update()
 		if core.start_screen.timer == 0:
 			core.state = "game"

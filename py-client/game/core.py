@@ -28,9 +28,9 @@ class Game:
 		self.ai = []
 		self.pressed = []
 		self.max_score = 10
+		self.players = False
 
 	def start(self, websocket):
-		# self.full = False
 		self.online = False
 		self.is_running = True
 		self.id = 0

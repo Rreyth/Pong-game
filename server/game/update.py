@@ -3,7 +3,7 @@ from AI import *
 from Ball import *
 
 async def update_all(core, delta):
-	if core.state == "game" and not core.pause:
+	if core.state == "game": # and not core.pause
 
 		core.ball.update(core, delta)
 		if core.obstacle:
@@ -19,7 +19,6 @@ async def update_all(core, delta):
 			player.speed = player.speed_per_sec * delta
 		if core.state == "end":
 			await core.sendHub(core.endMsg(0))
-			# await core.hub.send(json.dumps(core.endMsg(0)))
 			await core.sendAll(core.endMsg(0))
 			core.is_running = False
 	if core.state == "start":
