@@ -103,7 +103,6 @@ class Game:
 		pg.display.update() #call to update render
 		
 	async def quit(self): #send endGame with end infos
-		pg.quit()
 		if self.is_running:
 			if not self.online:
 				await self.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
@@ -115,3 +114,6 @@ class Game:
 					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))
 		self.state = "quit"
 		self.is_running = False
+	
+	def pygame_quit(self):
+		pg.quit()

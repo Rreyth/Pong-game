@@ -6,7 +6,7 @@ async def update_all(core, delta):
 	if core.state == "game" and not core.pause[1].freeze:
 
 		core.ball.update(core, delta)
-		if core.obstacle:
+		if core.obstacle and not core.online:
 			core.obstacle.update()
 
 		for ai in core.ai:

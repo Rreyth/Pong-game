@@ -108,32 +108,15 @@ class Menu:
 			msg = {"type" : "quickGame", "cmd" : "join", "online" : "true"}
 			await core.GameHub.send(json.dumps(msg))
 			response : dict = json.loads(await core.GameHub.recv())
-			print(response)
 			if 'socket' in response.keys():
 				core.GameSocket = response['socket']
 				room_id = response['ID']
 				core.state = "waiting"
 				core.mode = "ONLINE"
-				core.id = response['pos']
-				# core.GameRoom = await websockets.connect(response['socket'])
-				# await core.GameRoom.send(json.dumps({'type' : 'join'}))
-				# response : dict = json.loads(await core.GameRoom.recv())
-				# print(response)
-				# if response['type'] == 'start': #add game infos ? player id ? etc...
-				# 	room_id = response['Room_id']
-				# 	core.state = "launch"
-		
-			# core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
-			# core.walls = [Wall("up", False), Wall("down", False)]
-			# core.ball = Ball(False)
+				core.id = response['pos']	
 			core.online = True
 			wait_nb = 2
-	
-			# go in waiting screen
 
-			#waiting screen if response = waiting
-			#wait for game start msg
-			#stock info
 		if core.mode != "none":
 			self.buttons[5].name = ""
 			self.err = False

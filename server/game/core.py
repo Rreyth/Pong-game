@@ -12,27 +12,19 @@ from update import *
 class Game:
 	def __init__(self): #init class
 		self.winSize = [winWidth, winHeight]
-		# self.fps = 120
 		self.last = time.time()
 		self.state = "wait"
-		self.mode = "none"
 		self.clients = set()
 		self.is_running = True
 		self.start = [4, time.time()]
-		# self.pause = False #toujours false ? vu que on peut freeze le jeu uniquement en local game
 		self.hub = False
 		self.id = 0
   
-		##TOUTE LES GAMES INFO #depends on mode
-		# self.requiered = 2
-		# self.ball = Ball(False)
-		# self.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
-		self.ai = []
-		# self.max_score = 10
-		# self.walls = [Wall("up", False), Wall("down", False)]
+		self.ai = []#will move later
+
 		self.obstacle = False
 		self.custom_mod = False
-        ##
+
     
 	def initQuickGame(self):
 		self.requiered = 2
@@ -40,6 +32,9 @@ class Game:
 		self.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 		self.max_score = 10
 		self.walls = [Wall("up", False), Wall("down", False)]
+    
+	def initCustom(self, msg : dict):
+		pass
     
 	def endMsg(self, id):
 		msg = {'type' : 'endGame'}
@@ -73,16 +68,21 @@ class Game:
 					'players' : [[player.paddle[0].pos.x, player.paddle[0].pos.y] for player in self.players],
 					'ball' : [self.ball.center[0].x, self.ball.center[0].y, self.ball.stick, self.ball.speed, self.ball.dir],
 					'score' : [player.score for player in self.players]}
+			if self.obstacle:
+				msg['obstacle'] = self.obstacle.solid
 		await self.sendAll(msg)
  
 	async def join(self, websocket):
 		await self.sendAll({'type' : 'join'})
 		self.clients.add(websocket)
-		await websocket.send(json.dumps({'type' : 'start', 'id' : self.clients.__len__(),
-                    'Room_id' : self.id,
-                    'players' : [[player.nb, player.name, player.nb_total, player.borderless, player.square] for player in game.players],
-             		'walls' : [[wall.pos, wall.square] for wall in game.walls],
-               		'ball' : game.ball.borderless}))
+		msg = {'type' : 'start', 'id' : self.clients.__len__(),
+				'Room_id' : self.id,
+				'players' : [[player.nb, player.name, player.nb_total, player.borderless, player.square] for player in game.players],
+				'walls' : [[wall.pos, wall.square] for wall in game.walls],
+				'ball' : game.ball.borderless}
+		if self.obstacle:
+			msg['obstacle'] = self.obstacle.solid
+		await websocket.send(json.dumps())
 		if self.clients.__len__() == self.requiered:
 			self.state = 'ready'
 			# await self.hub.send(json.dumps({'type' : 'Full'}))
@@ -159,9 +159,12 @@ async def parse_msg(msg : dict, websocket):
 			game.hub = set()
 			game.hub.add(websocket)	
 		if msg['cmd'] == 'quickGame':
-			game.mode = 'online'
 			game.id = msg['Room_id']
 			game.initQuickGame()
+			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
+		if msg['cmd'] == 'custom':
+			game.id = msg['Room_id']
+			game.initCustom(msg)
 			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
 
 	if msg['type'] == 'join':

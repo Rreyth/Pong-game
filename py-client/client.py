@@ -40,6 +40,8 @@ async def parse_msg(msg : dict, websocket):#todo
 			game.ball.stick = msg['ball'][2]
 			game.ball.speed = msg['ball'][3]
 			game.ball.dir = msg['ball'][4]
+			if game.obstacle:
+				game.obstacle.solid = msg['obstacle']
 
 	if msg['type'] == 'endGame':
 		if 'cmd' in msg.keys() and msg['cmd'] == 'quitWait':
@@ -120,7 +122,11 @@ async def wait_loop():
 			game.players.append(Player(player[0], player[1], player[2], player[3], player[4]))
 		for wall in msg['walls']:
 			game.walls.append(Wall(wall[0], wall[1]))
+		if game.walls.__len__() == 0:
+			game.walls = False
 		game.ball = Ball(msg['ball'])
+		if 'obstacle' in msg.keys():
+			game.obstacle = Obstacle()
 		game.state = 'launch'
 	
 
@@ -145,6 +151,7 @@ async def in_game(websocket):
 				await game.GameRoom.close()
 			if game.state == 'menu' or game.state == 'end':
 				await in_game(websocket)
+			game.pygame_quit()
 
 
 async def main():
