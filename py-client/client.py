@@ -27,22 +27,23 @@ async def parse_msg(msg : dict, websocket):#todo
  
 	if msg['type'] == 'start':
 		game.state = 'start'
-		if game.id != game.players.__len__():
-			game.start_screen.timer = 4
 
 	if msg['type'] == 'update':
-		for i in range(game.players.__len__()):
-			game.players[i].paddle[0].pos = Vec2(pos=msg['players'][i])
-			game.players[i].score = msg['score'][i]
-		game.ball.center[0] = Vec2(msg['ball'][0], msg['ball'][1])
-		game.ball.stick = msg['ball'][2]
-		game.ball.speed = msg['ball'][3]
-		game.ball.dir = msg['ball'][4]
+		if 'timer' in msg.keys():
+			game.start_screen.timer = msg['timer']
+		else:
+			for i in range(game.players.__len__()):
+				game.players[i].paddle[0].pos = Vec2(pos=msg['players'][i])
+				game.players[i].score = msg['score'][i]
+			game.ball.center[0] = Vec2(msg['ball'][0], msg['ball'][1])
+			game.ball.stick = msg['ball'][2]
+			game.ball.speed = msg['ball'][3]
+			game.ball.dir = msg['ball'][4]
 
 	if msg['type'] == 'endGame':
 		if 'cmd' in msg.keys() and msg['cmd'] == 'quitWait':
 			if msg['id'] == game.id:
-				game.state = 'menu'
+				game.state = 'menu' if game.state != 'quit'	else 'quit'
 				game.is_running = False
 				if game.GameRoom:
 					await game.GameRoom.close()
@@ -125,7 +126,7 @@ async def in_game(websocket):
 				async for message in game.GameRoom:
 					await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
 					if game.state == 'launch':
-						game.state = 'waiting'
+						game.state = 'start'
 						asyncio.create_task(run_game())
 
 		finally:

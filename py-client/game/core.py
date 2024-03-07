@@ -27,7 +27,7 @@ class Game:
 		self.font = pg.font.Font(font, int(textSize))
 		self.ai = []
 		self.pressed = []
-		self.max_score = 2
+		self.max_score = 10
 
 	def start(self, websocket):
 		# self.full = False
@@ -104,13 +104,14 @@ class Game:
 		
 	async def quit(self): #send endGame with end infos
 		pg.quit()
-		self.state = "quit"
 		if self.is_running:
 			if not self.online:
 				await self.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 			else:
 				if self.state == 'waiting':
-					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id, 'cmd' : 'quitWait'}))
+					# await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id, 'cmd' : 'quitWait'}))
+					await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))
 				else:
 					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))
+		self.state = "quit"
 		self.is_running = False

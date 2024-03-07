@@ -5,7 +5,7 @@ import os
 import time
 import random
 import string
-
+import signal
 
 starting_port = 6670
 
@@ -17,12 +17,22 @@ class Room:
 		self.port = port
 		self.full = False
 		self.type = type
-		self.max_players = 3
+		self.max_players = max_players
 		self.players = set()
   
 	async def sendAll(self, msg : dict):
 		for player in self.players:
 			await player.send(json.dumps(msg))
+	
+	async def cleanEmpty(self):
+		global used_port, used_id
+		async with websockets.connect("ws://{}:{}".format(self.host, self.port)) as gameSocket:
+			msg = {'type' : 'close'}
+			await gameSocket.send(json.dumps(msg))
+			await gameSocket.close()
+		used_port.remove(self.port)
+		used_id.remove(self.id)
+
 
 rooms = {}
 
@@ -34,6 +44,7 @@ fordiben_port = [8000, 8001]
 clients = set()
 
 async def full_room(id, websocket):
+	global rooms
 	while not rooms[id].full:
 		try:
 			msg :dict = json.loads(await asyncio.wait_for(websocket.recv(), timeout=0.01))
@@ -42,14 +53,12 @@ async def full_room(id, websocket):
 		if msg['type'] == 'quitGame':
 			if 'cmd' in msg.keys() and msg['cmd'] == 'quitWait':
 				await rooms[id].sendAll({'type' : 'endGame', 'cmd' : 'quitWait', 'id': msg['id']})
-			rooms[id].players.remove(websocket)
+				rooms[id].players.remove(websocket)
+			else:
+				rooms[id].players.remove(websocket)
+				await rooms[id].sendAll({'type' : 'endGame', 'cmd' : 'quitWait', 'id': msg['id']})
 			if rooms[id].players.__len__() == 0:
-				async with websockets.connect("ws://{}:{}".format(rooms[id].host, rooms[id].port)) as gameSocket:
-					msg = {'type' : 'close'}
-					await gameSocket.send(json.dumps(msg))
-					await gameSocket.close()
-				used_port.remove(rooms[id].port)
-				used_id.remove(rooms[id].id)
+				await rooms[id].cleanEmpty()
 				rooms.pop(id)
 			break
 		if len(rooms[id].players) == rooms[id].max_players:
@@ -76,31 +85,25 @@ async def connection_handler(client_msg, websocket):
 	
 async def run_game(id, websocket):
 	global rooms, used_port, used_id
-	await websocket.send(json.dumps({'type' : 'start'}))
 	for room in rooms.values():
 		if room.id == id:
 			async with websockets.connect("ws://{}:{}".format(room.host, room.port)) as gameSocket:
 				msg = {'type' : 'create', 'cmd' : 'quickGame', 'mode' : 'online', 'Room_id' : room.id}
 				await gameSocket.send(json.dumps(msg))
+				await websocket.send(json.dumps({'type' : 'start'}))
 				try:
 					async for message in gameSocket:
-						if message['type'] == 'Full':
-							room.full = True
-						if message['type'] == 'endGame':
-							print(message)
-							# if 'cmd' in message.keys() and message['cmd'] == 'quitWait' and message['nb'] > 1:
-							# 	return
-							used_port.remove(room.port)
-							used_id.remove(room.id)
-							# await gameSocket.close()
-							rooms.pop(room.id)
-							return
+						msg :dict = json.loads(message)
+						print(msg)
+						if msg['type'] == 'endGame':
+							break
+
 				finally:
-					if room.port in used_port:
-						used_port.remove(room.port)
-						used_id.remove(room.id)
+					if id in rooms.keys():
 						rooms.pop(room.id)
-					return
+						used_id.remove(room.id)
+						used_port.remove(room.port)
+					break
  
  
 async def handle_join(client_msg, websocket):
@@ -117,13 +120,14 @@ async def handle_join(client_msg, websocket):
 			await full_room(room.id, websocket)
 			if client_msg['id'] in rooms.keys() and rooms[room.id].full:
 				await run_game(room.id, websocket)
+			return
 
 async def handle_quickGame(client_msg, websocket):
 	global rooms, used_port, used_id
-	if client_msg['cmd'] == 'quit':
-		#close game room
-		await websocket.send(json.dumps({'type' : 'quitWait'}))
-	elif client_msg['cmd'] == 'join':
+	# if client_msg['cmd'] == 'quit':
+	# 	#close game room
+	# 	await websocket.send(json.dumps({'type' : 'quitWait'}))
+	if client_msg['cmd'] == 'join':
 		if client_msg['online'] == 'false': #wait client to play + end game self
 			await websocket.send(json.dumps({'type' : 'starting'}))
 			response : dict = json.loads(await websocket.recv())
@@ -149,7 +153,7 @@ async def handle_quickGame(client_msg, websocket):
 			while port in used_port: port = port + 2 if port + 1 in fordiben_port else port + 1
 			used_port.append(port)
 			host = 'localhost'
-			os.system("python3 game/core.py {} {} &".format(host, port))
+			os.system("python3 game/core.py {} {} &".format(host, port)) #add 2>/dev/null to hide sysexit
 			time.sleep(0.1)
 
 			# async with websockets.connect("ws://{}:{}".format(host, port)) as gameSocket:
@@ -191,7 +195,7 @@ async def handle_quickGame(client_msg, websocket):
 async def parse_msg(message, websocket):
 	client_msg : dict = json.loads(message)
 
-	print(client_msg)
+	print('parse : ', client_msg)
 	if client_msg["type"] == "connect":
 		await connection_handler(client_msg, websocket)
 	if client_msg["type"] == "quickGame":
@@ -222,10 +226,14 @@ async def handle_client(websocket):
 
 
 async def main():
-	start_server = websockets.serve(handle_client, "localhost", 6669)
-	await start_server
-	# asyncio.create_task(send_updates())
-	await asyncio.Event().wait()
+	loop = asyncio.get_running_loop()
+	stop = loop.create_future()
+	loop.add_signal_handler(signal.SIGINT, stop.set_result, None)
+	loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
+ 
+	async with websockets.serve(handle_client, "localhost", 6669):
+		await stop
+	print("\nServer stopped")
 
 if __name__ == "__main__":
 	asyncio.run(main())

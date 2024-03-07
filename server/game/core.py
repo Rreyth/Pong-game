@@ -46,14 +46,26 @@ class Game:
 	async def sendAll(self, msg : dict):
 		for client in self.clients:
 			await client.send(json.dumps(msg))
+	
+	async def sendHub(self, msg : dict):
+		for hub in self.hub:
+			await hub.send(json.dumps(msg))
+ 
+	async def closeAll(self):
+		for client in self.clients:
+			await client.close()
+		await self.hub.close()
  
 	async def sendUpdate(self):
 		if not self.is_running:
 			return
-		msg = {'type' : 'update',
-         		'players' : [[player.paddle[0].pos.x, player.paddle[0].pos.y] for player in self.players],
-		 		'ball' : [self.ball.center[0].x, self.ball.center[0].y, self.ball.stick, self.ball.speed, self.ball.dir],
-     			'score' : [player.score for player in self.players]}
+		if game.state == "start":
+			msg = {'type' : 'update', 'timer' : game.start[0]}
+		else:
+			msg = {'type' : 'update',
+					'players' : [[player.paddle[0].pos.x, player.paddle[0].pos.y] for player in self.players],
+					'ball' : [self.ball.center[0].x, self.ball.center[0].y, self.ball.stick, self.ball.speed, self.ball.dir],
+					'score' : [player.score for player in self.players]}
 		await self.sendAll(msg)
  
 	async def join(self, websocket):
@@ -62,7 +74,7 @@ class Game:
 		await websocket.send(json.dumps({'type' : 'start', 'id' : self.clients.__len__(), 'Room_id' : self.id}))
 		if self.clients.__len__() == self.requiered:
 			self.state = 'ready'
-			await self.hub.send(json.dumps({'type' : 'Full'}))
+			# await self.hub.send(json.dumps({'type' : 'Full'}))
 		await websocket.send(json.dumps({'type' : 'waiting'}))
 
 			
@@ -122,18 +134,23 @@ async def handle_game(websocket, path):
 		game.is_running = False
 		# print(websocket)
 		clients.remove(websocket)
-		if clients.__len__() == 0:
+		# print("finally nb : ", clients.__len__())
+		if clients.__len__() <= 0:
 			sys.exit()
 
  
 async def parse_msg(msg : dict, websocket):
 	global game
-	if msg['type'] == 'create' and not game.hub: #game creation depending on cmd
-		if msg['cmd'] == 'quickGame':
+	if msg['type'] == 'create': #game creation depending on cmd
+		if game.hub:
+			game.hub.add(websocket)
+		elif msg['cmd'] == 'quickGame':
 			game.mode = msg['mode']
 			game.id = msg['Room_id']
 			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
-			game.hub = websocket
+			# game.hub = websocket
+			game.hub = set()
+			game.hub.add(websocket)
 	if msg['type'] == 'join':
 		await game.join(websocket)
 	if msg['type'] == 'input' and game.state == 'game':
@@ -147,14 +164,17 @@ async def parse_msg(msg : dict, websocket):
 			if game.clients.__len__() == 0:
 				game.is_running = False
 		else:
-			await game.hub.send(json.dumps(game.endMsg(msg['id'])))
+			await game.sendHub(json.dumps(game.endMsg(msg['id'])))
+			# await game.hub.send(json.dumps(game.endMsg(msg['id'])))
 			await game.sendAll(game.endMsg(msg['id']))
 			game.is_running = False
 			await websocket.close()
-		# sys.exit()
+			# sys.exit()
 	if msg['type'] == 'close':
 		game.is_running = False
 		await websocket.close()
+		# game.state = 'quit'
+		# await game.closeAll()
 	
 
 game = Game()
