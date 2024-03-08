@@ -62,10 +62,8 @@ class Menu:
 				core.id = response['pos']
 				core.state = "waiting"
 				core.mode = "ONLINE"
-				core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
-				core.walls = [Wall("up", False), Wall("down", False)]
-				core.ball = Ball(False)	
 				core.online = True
+				wait_nb = response['max']
 
 		if name == self.buttons[5].name:
 			self.buttons[5].highlight = not self.buttons[5].highlight
@@ -73,7 +71,7 @@ class Menu:
 		if name == "LOCAL":
 			msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
 			await core.GameHub.send(json.dumps(msg))
-			response : dict = json.loads(await core.GameHub.recv())
+			# response : dict = json.loads(await core.GameHub.recv())
 	
 			core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
 			core.walls = [Wall("up", False), Wall("down", False)]
@@ -81,7 +79,7 @@ class Menu:
 			core.state = "start"
 			core.mode = "LOCAL"
 	
-		if name == "SOLO":
+		if name == "SOLO": #TODO
 			msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
 			await core.GameHub.send(json.dumps(msg))
 			response : dict = json.loads(await core.GameHub.recv())
@@ -120,8 +118,9 @@ class Menu:
 		if core.mode != "none":
 			self.buttons[5].name = ""
 			self.err = False
-			core.start_screen = StartScreen(core.mode)
-			if core.online:
+			if not core.start_screen:
+				core.start_screen = StartScreen(core.mode)
+			if core.online and not core.wait_screen:
 				core.wait_screen = WaitScreen(room_id, core.id, wait_nb, "QuickGame Online")
 
 

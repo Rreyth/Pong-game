@@ -51,14 +51,14 @@ async def mouse_handler(core):
 	elif core.pause[0]:
 		await pause_input(core)
 	elif core.state == "custom":
-		custom_input(core)
+		await custom_input(core)
 	elif core.state == 'waiting':
 		if core.mouseState[0] and pg.mouse.get_focused():
 			await core.wait_screen.click(core, core.mousePos)
 
-def custom_input(core):
+async def custom_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():
-		core.custom_menu.click(core, core.mousePos)
+		await core.custom_menu.click(core, core.mousePos)
 
 async def end_input(core):
 	if core.mouseState[0] and pg.mouse.get_focused():

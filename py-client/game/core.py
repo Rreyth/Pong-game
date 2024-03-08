@@ -40,6 +40,8 @@ class Game:
 		self.win = pg.display.set_mode(self.winSize)
 		pg.display.set_caption("PONG")
 		self.last = time.time()
+		self.wait_screen = False
+		self.start_screen = False
 			
 	async def input(self): #catch user input
 		for event in pg.event.get():
@@ -47,7 +49,7 @@ class Game:
 				await self.quit()
 			if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
 				await escape_handler(self)
-			if event.type == pg.KEYDOWN and self.menu.buttons[5].highlight:
+			if event.type == pg.KEYDOWN and self.menu.buttons[5].highlight and self.state == "menu":
 				await input_id(self, self.menu.buttons[5], event.key, event.unicode)
 			if event.type == pg.MOUSEBUTTONDOWN:
 				self.mouseState = pg.mouse.get_pressed()

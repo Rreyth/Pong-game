@@ -8,6 +8,7 @@ from Player import *
 from Wall import *
 from Ball import *
 from update import *
+from Obstacle import *
 
 class Game:
 	def __init__(self): #init class
@@ -34,7 +35,25 @@ class Game:
 		self.walls = [Wall("up", False), Wall("down", False)]
     
 	def initCustom(self, msg : dict):
-		pass
+		self.requiered = msg['players']
+		self.ball = Ball(True if "BORDERLESS" in msg['mods'] else False)
+		self.players = []
+		for i in range(msg['players']):
+			self.players.append(Player(i + 1, "Player{}".format(i + 1) if msg['ai'] < msg['players'] - i else 'AI', msg['players'], True if "BORDERLESS" in msg['mods'] else False, True if "1V1V1V1" in msg['mods'] else False))
+		for player in self.players:
+			if player.name == 'AI':
+				self.ai.append(AI(player))
+
+		self.max_score = msg['score']
+		if "OBSTACLE" in msg['mods']:
+			self.obstacle = Obstacle()
+		self.walls = False
+		if "1V1V1V1" in msg['mods']:
+			self.custom_mod = "1V1V1V1"
+			self.walls = [Wall("up", True), Wall("down", True), Wall("left", True), Wall("right", True)]
+		elif "BORDERLESS" not in msg['mods']:
+			self.walls = [Wall("up", False), Wall("down", False)]
+
     
 	def endMsg(self, id):
 		msg = {'type' : 'endGame'}
@@ -78,7 +97,7 @@ class Game:
 		msg = {'type' : 'start', 'id' : self.clients.__len__(),
 				'Room_id' : self.id,
 				'players' : [[player.nb, player.name, player.nb_total, player.borderless, player.square] for player in game.players],
-				'walls' : [[wall.pos, wall.square] for wall in game.walls],
+				'walls' : [[wall.pos, wall.square] for wall in game.walls] if game.walls else [],
 				'ball' : game.ball.borderless}
 		if self.obstacle:
 			msg['obstacle'] = self.obstacle.solid

@@ -12,13 +12,15 @@ async def update_all(core, delta):
 		if not core.online:
 			for ai in core.ai:
 				ai.update(core, core.players[1])
-
+		end = False
 		for player in core.players:
 			if not core.online and player.score == core.max_score and core.max_score != 0:
 				core.state = "end"
 				player.win = "WIN"
-				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
-			player.speed = player.speed_per_sec * delta
+				end = True
+			player.update(delta)
+		if end:
+			await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 	if core.state == "start":
 		if not core.online:
 			core.start_screen.update()

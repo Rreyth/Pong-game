@@ -6,6 +6,7 @@ from .Wall import *
 from .StartScreen import *
 from .AI import *
 from .Obstacle import *
+from .WaitScreen import *
 
 class CustomMenu:
 	def __init__(self):
@@ -55,7 +56,7 @@ class CustomMenu:
 		for button in self.param_buttons:
 			button.draw(win)
 
-	def click(self, core, mousePos):
+	async def click(self, core, mousePos):
 		for button in self.down_buttons:
 			if button.hitbox.collidepoint(mousePos):
 				if button.name == "BACK TO MENU":
@@ -63,7 +64,7 @@ class CustomMenu:
 					core.mode = "none"
 					break
 				elif button.name == "START":
-					self.start(core)
+					await self.start(core)
 					break
 
 		for button in self.players_buttons:
@@ -115,21 +116,31 @@ class CustomMenu:
 				self.mod_buttons[1].highlight = False
 
 
-	def start(self, core):
+	async def start(self, core):
 		if not self.validStart():
 			return
 		self.getMods()
 		core.max_score = self.score
-		self.initPlayers(core)
-		self.initWalls(core)
-		core.ball = Ball(True if "BORDERLESS" in self.mod_list else False)
-		core.state = "start"
-		if "LOCAL" in self.mod_list:
+		if "LOCAL" in self.mod_list: #add gamehub msg
+			self.initPlayers(core)
+			self.initWalls(core)
+			core.ball = Ball(True if "BORDERLESS" in self.mod_list else False)
+			core.state = "start"
 			core.mode = "LOCAL"
+			if "OBSTACLE" in self.mod_list:
+				core.obstacle = Obstacle()
+			msg = {"type" : 'custom', 'online' : 'false'}
+			await core.GameHub.send(json.dumps(msg))
 		elif "ONLINE" in self.mod_list:
-			pass #same as quick onlince
-		if "OBSTACLE" in self.mod_list:
-			core.obstacle = Obstacle()
+			core.mode = "ONLINE"
+			msg = {"type" : 'custom', 'online' : 'true', 'mods' : self.mod_list, 'score' : self.score, 'ai' : self.ai_nb, 'players' : self.players.__len__()}
+			await core.GameHub.send(json.dumps(msg))
+			response : dict = json.loads(await core.GameHub.recv())
+			core.GameSocket = response['socket']
+			core.id = response['pos']
+			core.state = "waiting"
+			core.online = True
+			core.wait_screen = WaitScreen(response['ID'], core.id, self.players.__len__(), "CUSTOM")
 		if "1V1V1V1" in self.mod_list:
 			core.custom_mod = "1V1V1V1"
 
