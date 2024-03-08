@@ -4,10 +4,13 @@ import copy
 from .Vec2 import *
 
 class AI: #pygame fait chier, le mode standalone aussi, si je veux avancer sur l'ia il vaut mieux passer en mode serv-cli
-	def __init__(self, ai):
+	def __init__(self, player):
+		self.id = player.nb
+		self.side = player.side
 		self.time = 0
-		self.pos = Vec2(pos=ai.paddle[0].pos)
-		self.target = Vec2(pos=ai.paddle[0].pos)
+		self.pos = Vec2(pos=player.paddle[0].pos)
+		self.target = Vec2(pos=self.pos)
+		self.moves = []
 
 	def update(self, core, ai):
 		# if core.ball.stick == ai.nb: # standby, when client version, launch msg to serv
@@ -20,7 +23,7 @@ class AI: #pygame fait chier, le mode standalone aussi, si je veux avancer sur l
 		
 		# if self.target != ai.paddle[0].topleft:
 			# self.move(ai)
- 
+
 	def predict(self, core):
 		pass
 		# tmp = copy.deepcopy(core)

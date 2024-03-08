@@ -82,7 +82,7 @@ class Game:
 				'ball' : game.ball.borderless}
 		if self.obstacle:
 			msg['obstacle'] = self.obstacle.solid
-		await websocket.send(json.dumps())
+		await websocket.send(json.dumps(msg))
 		if self.clients.__len__() == self.requiered:
 			self.state = 'ready'
 			# await self.hub.send(json.dumps({'type' : 'Full'}))
@@ -209,12 +209,5 @@ async def main():
 	game_server = websockets.serve(handle_game, args[1], args[2])
 	await game_server
 	await asyncio.Event().wait()
-
-	# server = await game_server
-	# if not game.is_running:
-	# 	server.close()
-	# await server.wait_closed()
-	# asyncio.get_event_loop().run_until_complete(server.wait_closed())
-
 
 asyncio.run(main())

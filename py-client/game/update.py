@@ -9,8 +9,9 @@ async def update_all(core, delta):
 		if core.obstacle and not core.online:
 			core.obstacle.update()
 
-		for ai in core.ai:
-			ai.update(core, core.players[1]) #modif ai pour appel en loop avec les bons params
+		if not core.online:
+			for ai in core.ai:
+				ai.update(core, core.players[1])
 
 		for player in core.players:
 			if not core.online and player.score == core.max_score and core.max_score != 0:
