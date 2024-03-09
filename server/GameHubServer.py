@@ -123,7 +123,7 @@ async def handle_join(client_msg, websocket):
 			await room.sendAll({"type" : "join"})
 			room.players.add(websocket)
 			room.players_nb += 1
-			await websocket.send(json.dumps({'type' : 'joinResponse', 'success' : 'true', 'socket' : 'ws://{}:{}'.format(room.host, room.port), 'pos' : room.players_nb, 'max' : room.max_players}))
+			await websocket.send(json.dumps({'type' : 'joinResponse', 'success' : 'true', 'socket' : 'ws://{}:{}'.format(room.host, room.port), 'pos' : room.players_nb, 'max' : room.max_players, 'mode' : room.type, 'custom_mods' : room.mods}))
 			await full_room(room.id, websocket)
 			if client_msg['id'] in rooms.keys() and rooms[room.id].full:
 				await run_game(room.id, websocket)

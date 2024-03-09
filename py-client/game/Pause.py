@@ -23,6 +23,7 @@ class Pause:
 				if button.name == "BACK TO MENU":
 					core.state = "menu"
 					core.mode = "none"
+					core.pressed = []
 					if not core.online:
 						await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 					else:

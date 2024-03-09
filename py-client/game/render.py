@@ -79,7 +79,7 @@ def render_start(core):
 	alpha_surface.fill((0, 0, 0, 125))
 	core.win.blit(alpha_surface, (0, 0))
  
-	core.start_screen.draw(core.win)
+	core.start_screen.draw(core.win, core.id)
 
 def render_wait(core):
 	core.win.fill((0, 0, 0))

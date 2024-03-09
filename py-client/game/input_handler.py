@@ -30,9 +30,11 @@ def online_input(core):
 		if core.keyboardState[pg.K_SPACE] and core.ball.stick == core.id:
 			core.pressed.append("LAUNCH")
 			core.ball.launch()
+	if core.mode == 'solo':
+		core.pressed = []
 
 def input_handler(core):
-	if core.online:
+	if core.online or (core.mode == "solo" and not core.pause[0]):
 		online_input(core)
 	else:
 		if core.state == "game" and not core.pause[0]:

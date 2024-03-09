@@ -29,15 +29,17 @@ class Game:
 		self.pressed = []
 		self.max_score = 10
 		self.players = False
+		self.win = False
 
 	def start(self, websocket):
 		self.online = False
 		self.is_running = True
-		self.id = 0
+		self.id = 1
 		self.GameRoom = False
 		self.GameHub = websocket
 		self.winSize = [winWidth, winHeight]
-		self.win = pg.display.set_mode(self.winSize)
+		if not self.win:
+			self.win = pg.display.set_mode(self.winSize)
 		pg.display.set_caption("PONG")
 		self.last = time.time()
 		self.wait_screen = False

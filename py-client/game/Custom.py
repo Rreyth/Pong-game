@@ -144,7 +144,7 @@ class CustomMenu:
 		if "1V1V1V1" in self.mod_list:
 			core.custom_mod = "1V1V1V1"
 
-		core.start_screen = StartScreen(core.mode) #adapt to nb players #custom start screen ??
+		core.start_screen = StartScreen('custom', core.online, True if "1V1V1V1" in self.mod_list else False, self.players.__len__())
 
 	def getMods(self):
 		self.mod_list = []
