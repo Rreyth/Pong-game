@@ -67,8 +67,10 @@ def render_end(core):
 	
 	if core.players.__len__() == 2:
 		score = [core.players[0].score, core.players[1].score]
-	elif core.players.__len__() == 4:
+	elif core.players.__len__() == 4 and core.custom_mod != "1V1V1V1":
 		score = [core.players[0].score, core.players[2].score]
+	else:
+		score = [core.players[0].score, core.players[1].score, core.players[2].score, core.players[3].score]
 	core.end.draw(core, core.win, score)
 	
 def render_start(core):

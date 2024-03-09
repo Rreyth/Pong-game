@@ -98,12 +98,12 @@ class StartScreen:
                         2 : [Button("UP", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("DOWN", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("NUM0", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
-                        3 : [Button("T", (winWidth / 3) - (self.size[0] / 2), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+                        3 : [Button("T", (winWidth / 2) - (self.size[0] * 1.7), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("Y", (winWidth / 2) - (self.size[0] / 2), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-						Button("H", (winWidth / 3 * 2) - (self.size[1] / 2), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
-                        4 : [Button("K", (winWidth / 3) - (self.size[0] / 2), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("H", (winWidth / 2) + (self.size[0] * 0.7), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
+                        4 : [Button("K", (winWidth / 2) - (self.size[0] * 1.7), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("L", (winWidth / 2) - (self.size[0] / 2), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-						Button("O", (winWidth / 3 * 2) - (self.size[1] / 2), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
+						Button("O", (winWidth / 2) + (self.size[0] * 0.7), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
 
 
 	def draw(self, win, player_id): #depends on mode + id

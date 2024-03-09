@@ -10,7 +10,8 @@ class End:
   
 	def draw(self, core, win, score):
 		if core.custom_mod == "1V1V1V1":
-			self.drawSquare(core, win)
+			self.drawSquare(core, win, score)
+			self.button = Button("BACK TO MENU", winWidth - self.size[0] - 50, winHeight - (self.size[1] * 1.5), self.size[0], self.size[1], winHeight * 0.085)
 		else:
 			text = [self.text_font.render(core.players[0].name, True, (255, 255, 255))]
 			pos = [[(winWidth / 3) - (text[0].get_size()[0] / 2), (winHeight / 3) - (text[0].get_size()[1] /2)]]
@@ -43,12 +44,41 @@ class End:
 
 		self.button.draw(win)
 
-	def drawSquare(self, core, win):
-		text = []
-		pos = []
+	def drawSquare(self, core, win, score):
+		names = [self.text_font.render(core.players[0].name, True, (255, 255, 255)),
+          		self.text_font.render(core.players[1].name, True, (255, 255, 255)),
+            	self.text_font.render(core.players[2].name, True, (255, 255, 255)),
+             	self.text_font.render(core.players[3].name, True, (255, 255, 255))]
+	
+		points = [self.text_font.render(str(score[0]), True, (255, 255, 255)),
+            	self.text_font.render(str(score[1]), True, (255, 255, 255)),
+             	self.text_font.render(str(score[2]), True, (255, 255, 255)),
+			  	self.text_font.render(str(score[3]), True, (255, 255, 255))]
 
-		for i in range(text.__len__()):
-				win.blit(text[i], pos[i])
+		wins = [self.text_font.render(core.players[0].win, True, (255, 255, 255)),
+				self.text_font.render(core.players[1].win, True, (255, 255, 255)),
+				self.text_font.render(core.players[2].win, True, (255, 255, 255)),
+				self.text_font.render(core.players[3].win, True, (255, 255, 255))]
+  
+		names_pos = [[(winWidth / 5) - (names[0].get_size()[0] / 2), (winHeight / 2) - (names[0].get_size()[1] /2)],
+					[(winWidth / 5 * 4) - (names[1].get_size()[0] / 2), (winHeight / 2) - (names[1].get_size()[1] /2)],
+               		[(winWidth / 2) - (names[2].get_size()[0] / 2), (winHeight / 8) - (names[2].get_size()[1] /2)],
+                 	[(winWidth / 2) - (names[3].get_size()[0] / 2), (winHeight / 8 * 7) - (names[3].get_size()[1] /2)]]
+
+		points_pos = [[(winWidth / 3) - (points[0].get_size()[0] / 2) + names[0].get_size()[0] + 50, (winHeight / 2) - (points[0].get_size()[1] /2)],
+					[(winWidth / 3 * 2) - (points[1].get_size()[0] / 2) - names[1].get_size()[0] - 50, (winHeight / 2) - (points[1].get_size()[1] /2)],
+               		[(winWidth / 2) - (points[2].get_size()[0] / 2), (winHeight / 3) - (points[2].get_size()[1] /2) + names[2].get_size()[0] + 50],
+                 	[(winWidth / 2) - (points[3].get_size()[0] / 2), (winHeight / 3 * 2) - (points[3].get_size()[1] /2) - names[3].get_size()[0] - 50]]
+
+		wins_pos = [[(winWidth / 5 * 2) - (wins[0].get_size()[0] / 2), (winHeight / 2) - (wins[0].get_size()[1] /2)],
+					[(winWidth / 5 * 3) - (wins[1].get_size()[0] / 2), (winHeight / 2) - (wins[1].get_size()[1] /2)],
+               		[(winWidth / 2) - (wins[2].get_size()[0] / 2), (winHeight / 4) - (wins[2].get_size()[1] /2)],
+                 	[(winWidth / 2) - (wins[3].get_size()[0] / 2), (winHeight / 4 * 3) - (wins[3].get_size()[1] /2)]]
+
+		for i in range(names.__len__()):
+				win.blit(names[i], names_pos[i])
+				win.blit(points[i], points_pos[i])
+				win.blit(wins[i], wins_pos[i])
   
 	async def click(self, core, mousePos):
 		if self.button.hitbox.collidepoint(mousePos):
