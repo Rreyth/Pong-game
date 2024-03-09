@@ -121,7 +121,7 @@ class CustomMenu:
 			return
 		self.getMods()
 		core.max_score = self.score
-		if "LOCAL" in self.mod_list: #add gamehub msg
+		if "LOCAL" in self.mod_list:
 			self.initPlayers(core)
 			self.initWalls(core)
 			core.ball = Ball(True if "BORDERLESS" in self.mod_list else False)
