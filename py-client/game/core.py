@@ -25,13 +25,13 @@ class Game:
 		self.pause = [False, Pause()]
 		self.end = End() #faire des variation ? passer dans menu ?
 		self.font = pg.font.Font(font, int(textSize))
-		self.ai = []
-		self.pressed = []
 		self.max_score = 10
 		self.players = False
 		self.win = False
 
 	def start(self, websocket):
+		self.ai = []
+		self.pressed = []
 		self.online = False
 		self.is_running = True
 		self.id = 1

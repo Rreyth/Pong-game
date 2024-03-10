@@ -96,6 +96,7 @@ async def run_game(id, websocket):
 			async with websockets.connect("ws://{}:{}".format(room.host, room.port)) as gameSocket:
 				msg = {'type' : 'create', 'cmd' : room.type, 'mods' : room.mods, 'Room_id' : room.id, 'score' : room.score, 'ai' : room.ai_nb, 'players' : room.max_players}
 				await gameSocket.send(json.dumps(msg))
+				await asyncio.sleep(0.01)
 				await websocket.send(json.dumps({'type' : 'start'}))
 				try:
 					async for message in gameSocket:

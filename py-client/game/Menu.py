@@ -59,7 +59,7 @@ class Menu:
 				core.mode = "ONLINE"
 				core.online = True
 				wait_nb = response['max']
-				core.custom_mod = "1V1V1V1" if "1V1V1V1" in response['custom_mod'] else False
+				core.custom_mod = "1V1V1V1" if "1V1V1V1" in response['custom_mods'] else False
 				core.start_screen = StartScreen(response['mode'], core.online, True if "1V1V1V1" in response['custom_mods'] else False, wait_nb)
 
 		if name == self.buttons[5].name:

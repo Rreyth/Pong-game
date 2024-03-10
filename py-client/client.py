@@ -156,14 +156,13 @@ async def in_game(websocket):
 
 async def main():
 	global game
-	async with websockets.connect("ws://localhost:6669") as websocket:
-		await try_connect(websocket)
-		await in_game(websocket)
-		
-				# else:
-				# 	if game.GameHub:
-				# 		#send close msg
-				# 		await websocket.close() #??? maybe just break to leave the async with ??
+	try:
+		async with websockets.connect("ws://localhost:6669") as websocket:
+			await try_connect(websocket)
+			await in_game(websocket)
+	except ConnectionRefusedError as e:
+		print("Connection failed: {}".format(e))
+		return(1)
 
 
 asyncio.run(main())

@@ -7,7 +7,7 @@ class Pause:
 		self.title_font = pg.font.Font(font, int(winHeight / 3))
 		self.size = [winWidth * 0.2, winHeight * 0.1]
 		self.buttons = [Button("RESUME", (winWidth / 2) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                  Button("BACK TO MENU", (winWidth / 2) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+				  Button("BACK TO MENU", (winWidth / 2) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
   
 	def draw(self, win):
 		title = self.title_font.render("PAUSE", True, (255, 255, 255))
@@ -23,11 +23,13 @@ class Pause:
 				if button.name == "BACK TO MENU":
 					core.state = "menu"
 					core.mode = "none"
-					core.pressed = []
 					if not core.online:
 						await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+						core.start_screen = False
+						core.wait_screen = False
+						core.ai = []
 					else:
 						await core.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : core.id}))
 				core.pause[0] = False
 				self.freeze = False
-     
+	 

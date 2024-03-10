@@ -32,6 +32,7 @@ def online_input(core):
 			core.ball.launch()
 	if core.mode == 'solo':
 		core.pressed = []
+		ai_moves(core, core.players[1])
 
 def input_handler(core):
 	if core.online or (core.mode == "solo" and not core.pause[0]):
@@ -87,7 +88,10 @@ def ai_moves(core, player):
 					player.moveLeft(core.walls)
 				elif move == "RIGHT":
 					player.moveRight(core.walls)
+				elif move == "LAUNCH" and core.ball.stick == player.nb:
+					core.ball.launch()
 			ai.pos = Vec2(pos=player.paddle[0].pos)
+			ai.moves = []
 			break
 
 def player_moves(core, player):

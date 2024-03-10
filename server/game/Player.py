@@ -168,3 +168,9 @@ class Player:
 				continue
 			paddle.collidePaddle(ball, self.nb)
 			break
+
+	def update(self, delta):
+		if self.borderless:
+			self.paddle[1].pos.y = self.paddle[0].pos.y - winHeight
+			self.paddle[2].pos.y = self.paddle[0].pos.y + winHeight
+		self.speed = self.speed_per_sec * delta

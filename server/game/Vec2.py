@@ -20,6 +20,12 @@ class Vec2:
 			return self.x
 		return self.y
 
+	def __ne__(self, other):
+		return self.x != other.x or self.y != other.y
+
+	def __eq__(self, other):
+		return self.x == other.x and self.y == other.y
+
 	def scale(self, nb):
 		self.x *= nb
 		self.y *= nb

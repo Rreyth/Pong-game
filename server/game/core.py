@@ -21,7 +21,7 @@ class Game:
 		self.hub = False
 		self.id = 0
   
-		self.ai = []#will move later
+		self.ai = []
 
 		self.obstacle = False
 		self.custom_mod = False
@@ -35,6 +35,7 @@ class Game:
 		self.walls = [Wall("up", False), Wall("down", False)]
     
 	def initCustom(self, msg : dict):
+		print(msg)
 		self.requiered = msg['players']
 		self.ball = Ball(True if "BORDERLESS" in msg['mods'] else False)
 		self.players = []
@@ -59,7 +60,7 @@ class Game:
 		msg = {'type' : 'endGame'}
 		if id != 0:
 			for player in self.players:
-				player.win = 'LOSE' if player.nb == id else 'WIN'
+				player.win = 'LOSE' if player.side == self.players[id - 1].side else 'WIN'
 		msg['score'] = [player.score for player in self.players]
 		msg['win'] = [player.win for player in self.players]
 		return msg
@@ -102,7 +103,7 @@ class Game:
 		if self.obstacle:
 			msg['obstacle'] = self.obstacle.solid
 		await websocket.send(json.dumps(msg))
-		if self.clients.__len__() == self.requiered:
+		if self.clients.__len__() + self.ai.__len__() == self.requiered:
 			self.state = 'ready'
 			# await self.hub.send(json.dumps({'type' : 'Full'}))
 		await websocket.send(json.dumps({'type' : 'waiting'}))
@@ -120,6 +121,22 @@ class Game:
 				self.players[player_id - 1].moveRight(self.walls)
 			elif input == "LAUNCH" and self.ball.stick == player_id:
 				self.ball.launch()
+
+	def ai_moves(self):
+		for ai in self.ai:
+			for move in ai.moves:
+				if move == "UP":
+					self.players[ai.id - 1].moveUp(self.walls)
+				elif move == "DOWN":
+					self.players[ai.id - 1].moveDown(self.walls)
+				elif move == "LEFT":
+					self.players[ai.id - 1].moveLeft(self.walls)
+				elif move == "RIGHT":
+					self.players[ai.id - 1].moveRight(self.walls)
+				elif move == "LAUNCH" and self.ball.stick == ai.id:
+					self.ball.launch()
+			ai.pos = Vec2(pos=self.players[ai.id - 1].paddle[0].pos)
+			ai.moves = []
 
 		
 	async def tick(self): #calcul method
@@ -141,9 +158,10 @@ async def run_game():
 		await game.tick()
 		if not game.is_running:
 			break
-		await game.sendUpdate()
+		game.ai_moves()
 		if not game.is_running:
 			break
+		await game.sendUpdate()
 		await asyncio.sleep(0.01)
 
 
@@ -177,14 +195,14 @@ async def parse_msg(msg : dict, websocket):
 		else:
 			game.hub = set()
 			game.hub.add(websocket)	
-		if msg['cmd'] == 'quickGame':
-			game.id = msg['Room_id']
-			game.initQuickGame()
-			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
-		if msg['cmd'] == 'custom':
-			game.id = msg['Room_id']
-			game.initCustom(msg)
-			await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
+			if msg['cmd'] == 'quickGame':
+				game.id = msg['Room_id']
+				game.initQuickGame()
+				await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
+			if msg['cmd'] == 'custom':
+				game.id = msg['Room_id']
+				game.initCustom(msg)
+				await websocket.send(json.dumps({'type' : 'CreationSuccess'}))
 
 	if msg['type'] == 'join':
 		await game.join(websocket)
