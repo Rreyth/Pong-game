@@ -1,9 +1,9 @@
 from .config import *
 from .Vec2 import *
-from random import randint
 
 class Ball:
 	def __init__(self, borderless):
+		self.ai_hitbox = False
 		self.borderless = borderless
 		self.radius = 7
 		self.center = [Vec2(winWidth / 2, winHeight / 2)]
@@ -17,6 +17,21 @@ class Ball:
   
 		self.multiplier = 1.0
 		self.last_hit = 0
+
+
+	def copy(self, ai_hitbox = False):
+		ball = Ball(self.borderless)
+		ball.center = [Vec2(pos=self.center[0])]
+		if self.borderless:
+			ball.center.append(Vec2(pos=self.center[1]))
+			ball.center.append(Vec2(pos=self.center[2]))
+		ball.stick = self.stick
+		ball.side = self.side
+		ball.dir = self.dir
+		ball.multiplier = self.multiplier
+		ball.last_hit = self.last_hit
+		ball.ai_hitbox = ai_hitbox
+		return ball
 
 
 	def move(self, players, walls, obstacle):
@@ -48,7 +63,7 @@ class Ball:
 			for center in self.center:
 				tmp_x = center.x + (tmp_speed * cos(rad))
 				tmp_y = center.y + (tmp_speed * sin(rad))
-				collision = try_collide(tmp_x, tmp_y, self.radius, players, walls, obstacle)
+				collision = try_collide(tmp_x, tmp_y, self.radius, players, walls, obstacle, self.ai_hitbox)
 				if collision:
 					break
 			tmp_speed += self.radius
@@ -69,17 +84,19 @@ class Ball:
 				obstacle.collide(self)
 		if walls:
 			for wall in walls:
-				wall.collide(self)
+				if not wall.square:
+					wall.collide(self)
+		if not self.ai_hitbox:
+			for player in players:
+				player.collide(self)
 
-		for player in players:
-			player.collide(self)
-		
   
 	def update(self, core, delta):
 		self.speed = ball_speed_per_sec * delta * self.multiplier
 		self.move(core.players, core.walls, core.obstacle)
 		self.collide(core.walls, core.players, core.obstacle)
-		self.goal(core.players, core.custom_mod)
+		if not self.ai_hitbox:
+			self.goal(core.players, core.custom_mod)
 		self.unstuck(core.custom_mod)
 
 		if self.borderless:
@@ -137,6 +154,15 @@ class Ball:
 						players[0].score += 1
 				self.stick = player.nb
 				self.multiplier = 1.0
+				self.side = player.side
+				if player.side == "left":
+					self.center[0] = Vec2((player.paddle[0].pos.x + (player.size[0] / 2)) + 25, player.paddle[0].pos.y + (player.size[1] / 2))
+				if player.side == "right":
+					self.center[0] = Vec2((player.paddle[0].pos.x + (player.size[0] / 2)) - 25, player.paddle[0].pos.y + (player.size[1] / 2))
+				if player.side == "up":
+					self.center[0] = Vec2(player.paddle[0].pos.x + (player.size[0] / 2), (player.paddle[0].pos.y + (player.size[1] / 2)) + 25)
+				if player.side == "down":
+					self.center[0] = Vec2(player.paddle[0].pos.x + (player.size[0] / 2), (player.paddle[0].pos.y + (player.size[1] / 2)) - 25)
 				break
 
 	def launch(self):
@@ -157,7 +183,7 @@ class Ball:
 		self.stick = 0
   
   
-def try_collide(x, y, radius, players, walls, obstacle):
+def try_collide(x, y, radius, players, walls, obstacle, ai_hitbox = False):
 	tmp = [x - radius, y - radius]
 	
 	for player in players:
@@ -168,9 +194,14 @@ def try_collide(x, y, radius, players, walls, obstacle):
 	if obstacle and getDist(Vec2(x, y), obstacle.center) <= radius + obstacle.radius and obstacle.solid:
 		return True
 
+	if ai_hitbox:
+		if is_colliding(tmp, [radius * 2, radius * 2], ai_hitbox.pos, ai_hitbox.size):
+			return True
+
 	if not walls:
 		return False
 	for wall in walls:
-		if is_colliding(tmp, [radius * 2, radius * 2], wall.hitbox.pos, wall.size):
+		if not wall.square and is_colliding(tmp, [radius * 2, radius * 2], wall.hitbox.pos, wall.size):
 			return True
+ 
 	return False

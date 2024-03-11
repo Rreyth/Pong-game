@@ -6,6 +6,7 @@ class Wall:
 	def __init__(self, pos, square):
 		self.size = [winWidth ,5]
 		self.pos = pos
+		self.square = square
 
 		if not square:
 			if pos == "up":
@@ -37,4 +38,3 @@ class Wall:
 		if not is_colliding(ball_box, [ball.radius * 2, ball.radius * 2], self.hitbox.pos, self.size):
 			return
 		self.hitbox.collideWall(ball, self.pos)
-

@@ -9,7 +9,7 @@ class Player:
 		self.speed = self.speed_per_sec * 0.005
 		self.nb = nb
 		self.name = name
-		self.win = "LOOSE"
+		self.win = "LOSE"
 		self.score = 0
 		self.initPaddle(nb_total, borderless, square)
 		
@@ -94,9 +94,6 @@ class Player:
 		if self.borderless:
 			if self.paddle[0].pos.y + (self.size[1] / 2) < 0:
 				self.paddle[0].pos.y += winHeight
-			self.paddle[1].pos.y = self.paddle[0].pos.y - winHeight
-			self.paddle[2].pos.y = self.paddle[0].pos.y + winHeight
-
 			
 	def moveDown(self, walls):
 		init_speed = self.speed / 4
@@ -119,8 +116,6 @@ class Player:
 		if self.borderless:
 			if self.paddle[0].pos.y + (self.size[1] / 2) >= winHeight:
 				self.paddle[0].pos.y -= winHeight
-			self.paddle[1].pos.y = self.paddle[0].pos.y - winHeight
-			self.paddle[2].pos.y = self.paddle[0].pos.y + winHeight
 
 	def moveLeft(self, walls):
 		init_speed = self.speed / 4
@@ -161,7 +156,6 @@ class Player:
 	def draw(self, win):
 		for paddle in self.paddle:
 			pg.draw.rect(win, (255, 255, 255), pg.Rect((paddle.pos.x, paddle.pos.y), self.size))
-		# pg.draw.rect(win, (255, 0, 0), pg.Rect((self.goal.pos.x, self.goal.pos.y), self.goal.size))
 
 	def collide(self, ball):
 		for paddle in self.paddle:
@@ -170,3 +164,9 @@ class Player:
 				continue
 			paddle.collidePaddle(ball, self.nb)
 			break
+
+	def update(self, delta):
+		if self.borderless:
+			self.paddle[1].pos.y = self.paddle[0].pos.y - winHeight
+			self.paddle[2].pos.y = self.paddle[0].pos.y + winHeight
+		self.speed = self.speed_per_sec * delta

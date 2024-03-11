@@ -1,7 +1,7 @@
 from .config import *
 
 def render_game(core):
-	core.win.fill((0, 0, 0)) 
+	core.win.fill((0, 0, 0))
 
 	for player in core.players:
 		player.draw(core.win)
@@ -13,9 +13,9 @@ def render_game(core):
 	if core.obstacle:
 		core.obstacle.draw(core.win)
 
-	core.ball.draw(core.win)
-
 	render_text(core, core.players.__len__())
+
+	core.ball.draw(core.win)
 	
 
 def render_text(core, nb_players):
@@ -27,10 +27,28 @@ def render_text(core, nb_players):
 		pos = [((winWidth / 2) - (text[0].get_size()[0] / 2), textDist), (0, textDist), (winWidth - text[2].get_size()[0], textDist)]
 	
 	elif core.custom_mod == "1V1V1V1":
-		pass
-		# print("score:")
-		# for player in core.players:
-		# 	print(player.score)
+		color = (128, 128, 128) if core.obstacle else (224, 224, 224)
+
+		text = [core.font.render(str(core.players[0].score), True, color),
+            	core.font.render(str(core.players[1].score), True, color),
+             	core.font.render(str(core.players[2].score), True, color),
+			  	core.font.render(str(core.players[3].score), True, color)]
+
+		for player in core.players:
+			if core.ai.__len__() < 3:
+				name = player.name if player.name.__len__() <= 7 else player.name[:5] + '.' + player.name[-1]
+			else:
+				name = player.name if player.name.__len__() <= 7 else player.name[:6] + '.'
+			text.append(core.font.render(name, True, color))
+  
+		pos = [[(winWidth / 2) - (text[0].get_size()[0] / 2) - 135, (winHeight / 2) - (text[0].get_size()[1] /2)],
+				[(winWidth / 2) - (text[1].get_size()[0] / 2) + 135, (winHeight / 2) - (text[1].get_size()[1] /2)],
+				[(winWidth / 2) - (text[2].get_size()[0] / 2), (winHeight / 2) - 160],
+				[(winWidth / 2) - (text[3].get_size()[0] / 2), (winHeight / 2) + 165 - text[3].get_size()[1]],
+    			[(winWidth / 2) - (text[4].get_size()[0] / 2) - 60, (winHeight / 2) - (text[4].get_size()[1] /2)],
+				[(winWidth / 2) - (text[5].get_size()[0] / 2) + 60, (winHeight / 2) - (text[5].get_size()[1] /2)],
+				[(winWidth / 2) - (text[6].get_size()[0] / 2), (winHeight / 2) - 95],
+				[(winWidth / 2) - (text[7].get_size()[0] / 2), (winHeight / 2) + 100  - text[7].get_size()[1]]]
  
 	elif nb_players == 4:
 		score = str(core.players[0].score) + " - " + str(core.players[2].score)
@@ -67,8 +85,10 @@ def render_end(core):
 	
 	if core.players.__len__() == 2:
 		score = [core.players[0].score, core.players[1].score]
-	elif core.players.__len__() == 4:
+	elif core.players.__len__() == 4 and core.custom_mod != "1V1V1V1":
 		score = [core.players[0].score, core.players[2].score]
+	else:
+		score = [core.players[0].score, core.players[1].score, core.players[2].score, core.players[3].score]
 	core.end.draw(core, core.win, score)
 	
 def render_start(core):
@@ -80,7 +100,7 @@ def render_start(core):
 	core.win.blit(alpha_surface, (0, 0))
  
 	core.start_screen.draw(core.win)
- 
+
 def render_custom(core):
 	core.win.fill((0, 0, 0))
 	

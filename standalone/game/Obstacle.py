@@ -1,11 +1,10 @@
 from .config import *
 from .Vec2 import *
-import time
 
 class Obstacle:
 	def __init__(self):
 		self.center = Vec2(winWidth / 2, winHeight / 2)
-		self.radius = 100
+		self.radius = 150
 		self.solid = False
 		self.start = time.time()
   

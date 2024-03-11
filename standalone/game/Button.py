@@ -3,10 +3,12 @@ from .config import *
 class Button:
 	def __init__(self, name, x, y, width, height, text_size):
 		self.name = name
+		self.x = x
+		self.y = y
 		self.width = width
 		self.height = height
 		self.font = pg.font.Font(font, int(text_size))
-		self.hitbox = pg.Rect((x, y), (width, height)) #replace with hitbox class
+		self.hitbox = pg.Rect((x, y), (width, height))
 		self.highlight = False
 		
 		

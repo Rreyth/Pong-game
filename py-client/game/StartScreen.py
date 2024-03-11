@@ -17,7 +17,7 @@ class StartScreen:
 						Button("Space", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("UP", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("DOWN", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-						Button("LEFT", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
+						Button("NUM0", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
 
 		elif mode != "custom":
 			self.player_input = {1 : [Button("W", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
@@ -80,7 +80,7 @@ class StartScreen:
 					else:
 						self.player_input[2] = [Button("UP", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("DOWN", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-						Button("LEFT", winWidth - (winWidth / 4 + self.size[0]) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+						Button("NUM0", winWidth - (winWidth / 4 + self.size[0]) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
 
 					self.player_input[3] = [Button("NUM8", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("NUM5", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),

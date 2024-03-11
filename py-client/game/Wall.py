@@ -38,4 +38,3 @@ class Wall:
 		if not is_colliding(ball_box, [ball.radius * 2, ball.radius * 2], self.hitbox.pos, self.size):
 			return
 		self.hitbox.collideWall(ball, self.pos)
-

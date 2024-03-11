@@ -1,35 +1,67 @@
-import time
 from .config import *
 from .Button import *
 
-#mode pour modif quoi afficher et ou
- #adapt to nb players
 class StartScreen:
-	def __init__(self, mode):
+	def __init__(self, mode, square=False, nb_players = 2):
 		self.mode = mode
 		self.timer = 3
 		self.time = time.time()
 		self.font = pg.font.Font(font, int(winHeight * 0.085))
 		self.size = [150, 100]
 		self.player_input = []
-		if mode == "LOCAL":
-			self.player_input = [Button("W", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("S", (winWidth / 4) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("Space", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("UP", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("DOWN", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("LEFT", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+		if mode == "LOCAL" or (mode == 'custom' and nb_players == 2):
+			self.player_input = {1 : [Button("W", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("S", (winWidth / 4) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("Space", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("UP", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("DOWN", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("NUM0", (winWidth / 4 * 3) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
 
 		elif mode == "solo":
-			self.player_input = [Button("W", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("S", (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("Space", (winWidth / 5) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("UP", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
-                        Button("DOWN", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+			self.player_input = {1 : [Button("W", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("S", (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("Space", (winWidth / 5) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("UP", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+						Button("DOWN", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
+		else:
+			if not square:
+				self.player_input = {1 : [Button("W", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("S", (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("Space", (winWidth / 5) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
+				if 	nb_players == 4:
+					self.player_input[2] = [Button("T", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("G", (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+				else:
+					self.player_input[2] = [Button("UP", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("DOWN", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("NUM0", winWidth - (winWidth / 4 + self.size[0]) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+
+				self.player_input[3] = [Button("NUM8", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("NUM5", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("NUM0", winWidth - (winWidth / 4 + self.size[0]) + (self.size[0] * 0.275), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+
+				self.player_input[4] = [Button("UP", winWidth - (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("DOWN", winWidth - (winWidth / 4 + self.size[0]) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]
+	
+			else:
+				self.player_input = {1 : [Button("Space", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("W", (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("S", (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
+					2 : [Button("UP", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("DOWN", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("NUM0", winWidth - (winWidth / 5) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
+					3 : [Button("T", (winWidth / 2) - (self.size[0] * 1.7), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("Y", (winWidth / 2) - (self.size[0] / 2), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("H", (winWidth / 2) + (self.size[0] * 0.7), (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)],
+					4 : [Button("K", (winWidth / 2) - (self.size[0] * 1.7), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("L", (winWidth / 2) - (self.size[0] / 2), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
+					Button("O", (winWidth / 2) + (self.size[0] * 0.7), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
 
 	def draw(self, win):
-		for button in self.player_input:
-			button.draw(win)
+		for inputs in self.player_input.values():
+			for button in inputs:
+				button.draw(win)
+
 		timer = self.font.render(str(self.timer), True, (255, 255, 255))
 		win.blit(timer, ((winWidth / 2) - (timer.get_size()[0] / 2), (winHeight / 2) - (timer.get_size()[1] / 2)))
   

@@ -1,7 +1,6 @@
-import time
 import sys
-from .input_handler import *
 from .config import *
+from .input_handler import *
 from .Player import *
 from .Wall import *
 from .Ball import *
@@ -13,32 +12,35 @@ from .End import *
 from .StartScreen import *
 
 class Game:
-	def __init__(self): #init class
+	def __init__(self):
 		pg.init()
 		self.winSize = [winWidth, winHeight]
 		self.win = pg.display.set_mode(self.winSize)
 		self.clock = pg.time.Clock()
-		self.fps = 120
+		self.fps = 100
 		self.last = time.time()
 		self.state = "menu"
 		self.mode = "none"
 		self.menu = Menu()
 		self.pause = [False, Pause()]
-		self.end = End() #faire des variation ? passer dans menu ?
+		self.end = End()
 		self.font = pg.font.Font(font, int(textSize))
 		self.ai = []
+		self.max_score = 10
+		self.players = False
+		self.start_screen = False
 
 	
-	def run(self): #run game loop # relaunch when modif state
+	def run(self):
 		while True:
 			self.input()
 			self.tick()
 			self.render()
 			self.clock.tick(self.fps)
 			
-	def input(self): #catch user input
+	def input(self):
 		for event in pg.event.get():
-			if event.type == pg.QUIT: #event click on cross
+			if event.type == pg.QUIT:
 				self.quit()
 			if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
 				escape_handler(self)
@@ -51,7 +53,7 @@ class Game:
 
 		input_handler(self)
 		
-	def tick(self): #calcul method
+	def tick(self):
 		tmp = time.time()
 		delta = tmp - self.last
 		self.last = tmp

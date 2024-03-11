@@ -23,6 +23,8 @@ class Pause:
 				if button.name == "BACK TO MENU":
 					core.state = "menu"
 					core.mode = "none"
+					core.ai = []
+					core.start_screen = False
 				core.pause[0] = False
 				self.freeze = False
      

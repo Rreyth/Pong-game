@@ -10,13 +10,14 @@ def update_all(core, delta):
 			core.obstacle.update()
 
 		for ai in core.ai:
-			ai.update(core, core.players[1]) #modif ai pour appel en loop avec les bons params
+			ai.update(core, delta)
 
 		for player in core.players:
 			if player.score == core.max_score and core.max_score != 0:
 				core.state = "end"
 				player.win = "WIN"
-			player.speed = player.speed_per_sec * delta
+			player.update(delta)
+
 	if core.state == "start":
 		core.start_screen.update()
 		if core.start_screen.timer == 0:
