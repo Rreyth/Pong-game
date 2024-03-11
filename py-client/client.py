@@ -6,6 +6,7 @@ from game.core import *
 game = Game()
 
 async def try_connect(websocket):
+	global game
 	username = input("USERNAME: ")
 	password = input("PASSWORD: ")
 
@@ -14,12 +15,13 @@ async def try_connect(websocket):
 	response : dict = json.loads(await websocket.recv())
 	if response["success"] == "true":
 		print("Connection success")
+		#game.alias = response['alias']
 	else:
 		print(f"Connection failed: {response['error']}")
 		exit(1)
 
 
-async def parse_msg(msg : dict, websocket):#todo
+async def parse_msg(msg : dict):
 	global game
  
 	if msg['type'] == 'join':
@@ -100,7 +102,7 @@ async def wait_loop():
 	
 	msg = {'type' : 'none'}
 	while game.is_running and msg['type'] != 'start':
-		await parse_msg(msg, game.GameHub)
+		await parse_msg(msg)
 		await game.input()
 		if not game.is_running:
 			break
@@ -113,19 +115,21 @@ async def wait_loop():
 			msg = {'type' : 'none'}
 	if game.is_running:
 		game.GameRoom = await websockets.connect(game.GameSocket)
-		await game.GameRoom.send(json.dumps({'type' : 'join'}))
-		msg : dict = json.loads(await game.GameRoom.recv())
-		game.id = msg['id']
+		await game.GameRoom.send(json.dumps({'type' : 'join', 'name' : game.alias}))
+		infos : dict = json.loads(await game.GameRoom.recv())
+		while infos['type'] != 'start':
+			infos : dict = json.loads(await game.GameRoom.recv())
+		game.id = infos['id']
 		game.players = []
 		game.walls = []
-		for player in msg['players']:
+		for player in infos['players']:
 			game.players.append(Player(player[0], player[1], player[2], player[3], player[4]))
-		for wall in msg['walls']:
+		for wall in infos['walls']:
 			game.walls.append(Wall(wall[0], wall[1]))
 		if game.walls.__len__() == 0:
 			game.walls = False
-		game.ball = Ball(msg['ball'])
-		if 'obstacle' in msg.keys():
+		game.ball = Ball(infos['ball'])
+		if 'obstacle' in infos.keys():
 			game.obstacle = Obstacle()
 		game.state = 'launch'
 	
@@ -140,7 +144,7 @@ async def in_game(websocket):
 		try:
 			if game.GameRoom:
 				async for message in game.GameRoom:
-					await parse_msg(json.loads(message), game.GameRoom) #todo #update game with received for serv
+					await parse_msg(json.loads(message))
 					if game.state == 'launch':
 						game.state = 'start'
 						asyncio.create_task(run_game())

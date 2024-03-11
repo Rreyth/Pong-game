@@ -1,6 +1,5 @@
 from .config import *
 from .Vec2 import *
-from random import randint
 
 class Ball:
 	def __init__(self, borderless):

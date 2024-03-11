@@ -1,6 +1,5 @@
 from config import *
 from Vec2 import *
-import time
 
 class Obstacle:
 	def __init__(self):

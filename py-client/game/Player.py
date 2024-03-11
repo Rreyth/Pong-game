@@ -156,7 +156,6 @@ class Player:
 	def draw(self, win):
 		for paddle in self.paddle:
 			pg.draw.rect(win, (255, 255, 255), pg.Rect((paddle.pos.x, paddle.pos.y), self.size))
-		# pg.draw.rect(win, (255, 0, 0), pg.Rect((self.goal.pos.x, self.goal.pos.y), self.goal.size))
 
 	def collide(self, ball):
 		for paddle in self.paddle:

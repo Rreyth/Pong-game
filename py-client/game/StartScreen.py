@@ -1,9 +1,7 @@
-import time
 from .config import *
 from .Button import *
 
-#mode pour modif quoi afficher et ou
- #adapt to nb players
+
 class StartScreen:
 	def __init__(self, mode, online = False, square = False, nb_players = 2):
 		self.mode = mode
@@ -13,7 +11,7 @@ class StartScreen:
 		self.font = pg.font.Font(font, int(winHeight * 0.085))
 		self.size = [150, 100]
 		self.player_input = {}
-		if mode == "LOCAL" or (mode == 'custom' and nb_players == 2):
+		if mode == "LOCAL" or (mode == 'custom' and nb_players == 2 and not online):
 			self.player_input = {1 : [Button("W", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("S", (winWidth / 4) - (self.size[0] / 2), (winHeight / 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
 						Button("Space", (winWidth / 4) - (self.size[0] / 2), (winHeight / 3 * 2) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085),
@@ -106,7 +104,7 @@ class StartScreen:
 						Button("O", (winWidth / 2) + (self.size[0] * 0.7), winHeight - (winHeight / 5) - (self.size[1] / 2), self.size[0], self.size[1], winHeight * 0.085)]}
 
 
-	def draw(self, win, player_id): #depends on mode + id
+	def draw(self, win, player_id):
 		if self.online:
 			for id in self.player_input.keys():
 				if id == player_id:

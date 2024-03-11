@@ -1,9 +1,6 @@
 from .config import *
-import time
-import copy
 from .Vec2 import *
 from .Hitbox import *
-from random import randint
 
 class AI:
 	def __init__(self, player):

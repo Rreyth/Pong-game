@@ -1,11 +1,5 @@
-import time
-import sys
-import json
-import asyncio
-# import websockets
-
-from .input_handler import *
 from .config import *
+from .input_handler import *
 from .Player import *
 from .Wall import *
 from .Ball import *
@@ -17,17 +11,18 @@ from .End import *
 from .StartScreen import *
 
 class Game:
-	def __init__(self): #init class
+	def __init__(self):
 		pg.init()
 		self.state = "menu"
 		self.mode = "none"
 		self.menu = Menu()
 		self.pause = [False, Pause()]
-		self.end = End() #faire des variation ? passer dans menu ?
+		self.end = End()
 		self.font = pg.font.Font(font, int(textSize))
 		self.max_score = 10
 		self.players = False
 		self.win = False
+		self.alias = 'ALIAS'
 
 	def start(self, websocket):
 		self.ai = []
@@ -45,9 +40,9 @@ class Game:
 		self.wait_screen = False
 		self.start_screen = False
 			
-	async def input(self): #catch user input
+	async def input(self):
 		for event in pg.event.get():
-			if event.type == pg.QUIT: #event click on cross
+			if event.type == pg.QUIT:
 				await self.quit()
 			if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
 				await escape_handler(self)
@@ -65,7 +60,7 @@ class Game:
 
 		input_handler(self)
 		
-	async def tick(self): #calcul method
+	async def tick(self):
 		tmp = time.time()
 		delta = tmp - self.last
 		self.last = tmp
@@ -87,7 +82,7 @@ class Game:
 		self.pressed = []
 
 		
-	def render(self): #graphic update
+	def render(self):
 
 		if self.state == "waiting":
 			render_wait(self)
@@ -104,15 +99,14 @@ class Game:
 		elif self.state == "game":
 			render_game(self)
 
-		pg.display.update() #call to update render
+		pg.display.update()
 		
-	async def quit(self): #send endGame with end infos
+	async def quit(self):
 		if self.is_running:
 			if not self.online:
 				await self.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 			else:
 				if self.state == 'waiting':
-					# await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id, 'cmd' : 'quitWait'}))
 					await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))
 				else:
 					await self.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))

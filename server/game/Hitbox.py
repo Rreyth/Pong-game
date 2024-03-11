@@ -70,7 +70,3 @@ class Hitbox:
 		if ball.multiplier < 5:
 			ball.multiplier += 0.1
 		ball.last_hit = nb
-
-
-
-

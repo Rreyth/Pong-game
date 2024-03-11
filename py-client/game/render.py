@@ -35,7 +35,11 @@ def render_text(core, nb_players):
 			  	core.font.render(str(core.players[3].score), True, color)]
 
 		for player in core.players:
-			text.append(core.font.render((player.name[:6] + '.') if player.name.__len__() > 6 else player.name, True, color))
+			if not core.online and core.ai.__len__() < 3:
+				name = player.name if player.name.__len__() <= 7 else player.name[:5] + '.' + player.name[-1]
+			else:
+				name = player.name if player.name.__len__() <= 7 else player.name[:6] + '.'
+			text.append(core.font.render(name, True, color))
   
 		pos = [[(winWidth / 2) - (text[0].get_size()[0] / 2) - 135, (winHeight / 2) - (text[0].get_size()[1] /2)],
 				[(winWidth / 2) - (text[1].get_size()[0] / 2) + 135, (winHeight / 2) - (text[1].get_size()[1] /2)],
@@ -48,7 +52,13 @@ def render_text(core, nb_players):
  
 	elif nb_players == 4:
 		score = str(core.players[0].score) + " - " + str(core.players[2].score)
-		names = [core.players[0].name, core.players[1].name, core.players[2].name, core.players[3].name]
+		names = []
+		for player in core.players:
+			if not core.online and core.ai.__len__() < 3:
+				name = player.name if player.name.__len__() <= 12 else player.name[:10] + '.' + player.name[-1]
+			else:
+				name = player.name if player.name.__len__() <= 12 else player.name[:11] + '.'
+			names.append(name)
 		text = [core.font.render(score, True, (255, 255, 255))]
 		for name in names:
 			text.append(core.font.render(name, True, (255, 255, 255)))

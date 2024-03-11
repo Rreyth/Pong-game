@@ -104,7 +104,7 @@ class CustomMenu:
 			self.mod_buttons[0].highlight = True
 			self.mod_buttons[1].highlight = False
 			self.ai_nb = 2
-		elif self.players_buttons[1].highlight and self.ai_nb > 0:# and self.mod_buttons[3].highlight:
+		elif self.players_buttons[1].highlight and self.ai_nb > 0:
 			self.mod_buttons[0].highlight = True
 			self.mod_buttons[1].highlight = False
 		elif self.players_buttons[3].highlight:
@@ -119,7 +119,7 @@ class CustomMenu:
 	async def start(self, core):
 		if not self.validStart():
 			return
-		self.getMods()
+		self.getMods(core.alias)
 		core.max_score = self.score
 		if "LOCAL" in self.mod_list:
 			self.initPlayers(core)
@@ -146,7 +146,7 @@ class CustomMenu:
 
 		core.start_screen = StartScreen('custom', core.online, True if "1V1V1V1" in self.mod_list else False, self.players.__len__())
 
-	def getMods(self):
+	def getMods(self, alias = 'Player'):
 		self.mod_list = []
 		for button in self.mod_buttons:
 			if button.highlight:
@@ -160,21 +160,21 @@ class CustomMenu:
 					self.players[2] = "AI"
 					break
 				elif button.name == "1 VS 1":
-					self.players[1] = "Player1" if self.ai_nb < 2 else "AI"
-					self.players[2] = "Player2" if self.ai_nb < 1 else "AI"
+					self.players[1] = alias + "1" if self.ai_nb < 2 else "AI"
+					self.players[2] = alias + "2" if self.ai_nb < 1 else "AI"
 					break
 				elif button.name == "2 VS 2":
-					self.players[1] = "Player1" if self.ai_nb < 4 else "AI"
-					self.players[2] = "Player2" if self.ai_nb < 3 else "AI"
-					self.players[3] = "Player3" if self.ai_nb < 2 else "AI"
-					self.players[4] = "Player4" if self.ai_nb < 1 else "AI"
+					self.players[1] = alias + "1" if self.ai_nb < 4 else "AI"
+					self.players[2] = alias + "2" if self.ai_nb < 3 else "AI"
+					self.players[3] = alias + "3" if self.ai_nb < 2 else "AI"
+					self.players[4] = alias + "4" if self.ai_nb < 1 else "AI"
 					break
 				elif button.name == "1V1V1V1":
 					self.mod_list.append(button.name)
-					self.players[1] = "Player1" if self.ai_nb < 4 else "AI"
-					self.players[2] = "Player2" if self.ai_nb < 3 else "AI"
-					self.players[3] = "Player3" if self.ai_nb < 2 else "AI"
-					self.players[4] = "Player4" if self.ai_nb < 1 else "AI"
+					self.players[1] = alias + "1" if self.ai_nb < 4 else "AI"
+					self.players[2] = alias + "2" if self.ai_nb < 3 else "AI"
+					self.players[3] = alias + "3" if self.ai_nb < 2 else "AI"
+					self.players[4] = alias + "4" if self.ai_nb < 1 else "AI"
 
       
 	def initPlayers(self, core):

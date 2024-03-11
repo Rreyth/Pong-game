@@ -8,7 +8,6 @@ from .Pause import *
 from .AI import *
 from .Custom import *
 from .Button import *
-import websockets
 
 class Menu:
 	def __init__(self):
@@ -69,7 +68,7 @@ class Menu:
 			msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
 			await core.GameHub.send(json.dumps(msg))
 	
-			core.players = [Player(1, "Player1", 2, False, False), Player(2, "Player2", 2, False, False)]
+			core.players = [Player(1, core.alias + "1", 2, False, False), Player(2, core.alias + "2", 2, False, False)]
 			core.walls = [Wall("up", False), Wall("down", False)]
 			core.ball = Ball(False)
 			core.state = "start"
@@ -79,7 +78,7 @@ class Menu:
 			msg = {"type" : "quickGame", "cmd" : "join", "online" : "false"}
 			await core.GameHub.send(json.dumps(msg))
 	
-			core.players = [Player(1, "Player1", 2, False, False), Player(2, "AI", 2, False, False)]
+			core.players = [Player(1, core.alias, 2, False, False), Player(2, "AI", 2, False, False)]
 			core.ai.append(AI(core.players[1]))
 			core.walls = [Wall("up", False), Wall("down", False)]
 			core.ball = Ball(False)
