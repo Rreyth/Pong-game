@@ -46,6 +46,10 @@ fordiben_port = [8000, 8001, 44433, 5432]
 
 clients = set()
 
+async def send_to_DB(msg : dict): #add players infos + send to main serv for db
+	pass
+
+
 async def full_room(id, websocket):
 	global rooms
 	while not rooms[id].full:

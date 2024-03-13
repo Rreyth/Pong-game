@@ -41,11 +41,12 @@ class Game:
 		self.wait_screen = False
 		self.start_screen = False
 			
-	def endMsg(self): #add reason ?
+	def endMsg(self, reason = 'end'):
 		msg = {'type' : 'endGame'}
 		if self.players:
 			msg['score'] = [player.score for player in self.players]
 			msg['win'] = [player.win for player in self.players]
+		msg['reason'] = reason
 		return msg
    
 	async def input(self):
@@ -112,7 +113,7 @@ class Game:
 	async def quit(self):
 		if self.is_running:
 			if not self.online:
-				await self.GameHub.send(json.dumps(self.endMsg()))#send endGame to serv with end infos
+				await self.GameHub.send(json.dumps(self.endMsg('quit')))
 			else:
 				if self.state == 'waiting':
 					await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))

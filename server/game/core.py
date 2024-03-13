@@ -56,13 +56,14 @@ class Game:
 			self.walls = [Wall("up", False), Wall("down", False)]
 
     
-	def endMsg(self, id): #add reason for leaving the game ??
+	def endMsg(self, id, reason = 'end'): #add reason for leaving the game ??
 		msg = {'type' : 'endGame'}
 		if id != 0:
 			for player in self.players:
 				player.win = 'LOSE' if player.side == self.players[id - 1].side else 'WIN'
 		msg['score'] = [player.score for player in self.players]
 		msg['win'] = [player.win for player in self.players]
+		msg['reason'] = reason
 		return msg
  
 	def startMsg(self, id):
@@ -218,8 +219,8 @@ async def parse_msg(msg : dict, websocket):
 			if game.clients.__len__() == 0:
 				game.is_running = False
 		else:
-			await game.sendHub(json.dumps(game.endMsg(msg['id'])))
-			await game.sendAll(game.endMsg(msg['id']))
+			await game.sendHub(json.dumps(game.endMsg(msg['id'], 'quit')))
+			await game.sendAll(game.endMsg(msg['id'], 'quit'))
 			game.is_running = False
 			await websocket.close()
 

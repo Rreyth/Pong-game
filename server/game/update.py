@@ -18,8 +18,8 @@ async def update_all(core, delta):
 				player.win = "WIN"
 			player.speed = player.speed_per_sec * delta
 		if core.state == "end":
-			await core.sendHub(core.endMsg(0))
-			await core.sendAll(core.endMsg(0))
+			await core.sendHub(core.endMsg(0, 'end'))
+			await core.sendAll(core.endMsg(0, 'end'))
 			core.is_running = False
 
 	if core.state == "start":
