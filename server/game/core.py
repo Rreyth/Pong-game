@@ -1,6 +1,8 @@
 import sys
 import asyncio
 import websockets
+import signal
+import os
 
 from config import *
 from Player import *
@@ -177,12 +179,11 @@ async def handle_game(websocket, path):
 				await game.sendAll({'type' : 'start'})
 				asyncio.create_task(run_game())
 
-
 	finally:
 		game.is_running = False
 		clients.remove(websocket)
 		if clients.__len__() <= 0:
-			sys.exit()
+			os.kill(os.getpid(), signal.SIGTERM)
 
  
 async def parse_msg(msg : dict, websocket):
@@ -237,8 +238,12 @@ async def main():
 	global game
 	if args.__len__() != 3:
 		return
-	game_server = websockets.serve(handle_game, args[1], args[2])
-	await game_server
-	await asyncio.Event().wait()
+	loop = asyncio.get_running_loop()
+	stop = loop.create_future()
+	loop.add_signal_handler(signal.SIGTERM, stop.set_result, None)
+
+	async with websockets.serve(handle_game, args[1], args[2]):
+		await stop
+	print("Game room {} closed.".format(game.id))
 
 asyncio.run(main())

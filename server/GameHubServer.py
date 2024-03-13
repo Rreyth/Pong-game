@@ -142,7 +142,7 @@ async def handle_custom(client_msg, websocket):
 		while port in used_port or port in fordiben_port: port += 1
 		used_port.append(port)
 		host = 'localhost'
-		os.system("python3 game/core.py {} {} 2>/dev/null &".format(host, port))
+		os.system("python3 game/core.py {} {} &".format(host, port))
 		time.sleep(0.1)
 		room_id = id_generator()
 		used_id.append(room_id)
@@ -184,7 +184,7 @@ async def handle_quickGame(client_msg, websocket):
 		while port in used_port or port in fordiben_port: port += 1
 		used_port.append(port)
 		host = 'localhost'
-		os.system("python3 game/core.py {} {} 2>/dev/null &".format(host, port))
+		os.system("python3 game/core.py {} {} &".format(host, port))
 		time.sleep(0.1)
 
 		room_id = id_generator()
