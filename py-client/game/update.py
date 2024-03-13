@@ -19,7 +19,7 @@ async def update_all(core, delta):
 				player.win = "WIN"
 			player.update(delta)
 		if core.state == "end" and not core.online:
-			await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+			await core.GameHub.send(json.dumps(core.endMsg()))
 
 	if core.state == "start":
 		if not core.online:

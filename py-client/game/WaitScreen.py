@@ -26,9 +26,7 @@ class WaitScreen:
 		if self.player_input[0].hitbox.collidepoint(mousePos):
 			core.state = "menu"
 			core.mode = "none"
-			if not core.online:
-				await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
-			elif core.GameRoom:
+			if core.GameRoom:
 				await core.GameRoom.send(json.dumps({'type' : 'quitGame', 'id' : core.id, 'cmd' : 'quitWait'}))
 			else:
 				await core.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : core.id, 'cmd' : 'quitWait'}))

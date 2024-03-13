@@ -23,6 +23,7 @@ class Game:
 		self.players = False
 		self.win = False
 		self.alias = 'ALIAS'
+		self.is_running = False
 
 	def start(self, websocket):
 		self.ai = []
@@ -40,6 +41,13 @@ class Game:
 		self.wait_screen = False
 		self.start_screen = False
 			
+	def endMsg(self): #add reason ?
+		msg = {'type' : 'endGame'}
+		if self.players:
+			msg['score'] = [player.score for player in self.players]
+			msg['win'] = [player.win for player in self.players]
+		return msg
+   
 	async def input(self):
 		for event in pg.event.get():
 			if event.type == pg.QUIT:
@@ -104,7 +112,7 @@ class Game:
 	async def quit(self):
 		if self.is_running:
 			if not self.online:
-				await self.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+				await self.GameHub.send(json.dumps(self.endMsg()))#send endGame to serv with end infos
 			else:
 				if self.state == 'waiting':
 					await self.GameHub.send(json.dumps({'type' : 'quitGame', 'id' : self.id}))

@@ -86,7 +86,6 @@ class End:
 			core.mode = "none"
 			core.pause[0] = False
 			core.pause[1].freeze = False
-			await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
 			core.start_screen = False
 			core.wait_screen = False
 			core.ai = []

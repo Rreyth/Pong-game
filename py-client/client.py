@@ -1,6 +1,7 @@
 import asyncio
 import websockets
 import json
+import signal
 from game.core import *
 
 game = Game()
@@ -160,6 +161,17 @@ async def in_game(websocket):
 
 async def main():
 	global game
+ 
+	async def sig_handler(sig, frame):
+		if sig == signal.SIGINT:
+			print("Client interrupted")
+		else:
+			print("Client terminated")
+		await game.quit()
+	
+	signal.signal(signal.SIGINT, lambda sig, frame: asyncio.create_task(sig_handler(sig, frame)))
+	signal.signal(signal.SIGTERM, lambda sig, frame: asyncio.create_task(sig_handler(sig, frame)))
+
 	try:
 		async with websockets.connect("ws://localhost:6669") as websocket:
 			await try_connect(websocket)

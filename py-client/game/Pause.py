@@ -24,7 +24,7 @@ class Pause:
 					core.state = "menu"
 					core.mode = "none"
 					if not core.online:
-						await core.GameHub.send(json.dumps({'type' : 'endGame'}))#send endGame to serv with end infos
+						await core.GameHub.send(json.dumps(core.endMsg()))
 						core.start_screen = False
 						core.wait_screen = False
 						core.ai = []
