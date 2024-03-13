@@ -89,8 +89,10 @@ async def connection_handler(client_msg, websocket):
 		#if failure
 		# msg = {'type' : 'connectionRpl', 'success' : 'false', 'error' : 'invalid username or password'}
 		await websocket.send(json.dumps(msg))
-	#if client_msg['cmd'] == "token":
+	if client_msg['cmd'] == "token":
 		#same same but different
+		msg = {'type' : 'connectionRpl', 'success' : 'true', 'error' : 'none'} #add : 'alias' : {response['alias']}
+		await websocket.send(json.dumps(msg))
 	
 async def run_game(id, websocket):
 	global rooms, used_port, used_id
