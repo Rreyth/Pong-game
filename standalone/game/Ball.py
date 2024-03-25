@@ -96,7 +96,7 @@ class Ball:
 		self.move(core.players, core.walls, core.obstacle)
 		self.collide(core.walls, core.players, core.obstacle)
 		if not self.ai_hitbox:
-			self.goal(core.players, core.custom_mod)
+			self.goal(core.players, core.custom_mod, core.win)
 		self.unstuck(core.custom_mod)
 
 		if self.borderless:
@@ -128,10 +128,11 @@ class Ball:
 			else:
 				self.dir -= 5
 	
-	def goal(self, players, mod):
+	def goal(self, players, mod, win):
 		ball_box = [self.center[0].x - self.radius, self.center[0].y - self.radius]
 		for player in players:
 			if is_colliding(ball_box, [self.radius * 2, self.radius * 2], player.goal.pos, player.goal.size):
+				self.draw(win)
 				if players.__len__() == 2:
 					if player.nb == 1:
 						players[1].score += 1
@@ -179,7 +180,8 @@ class Ball:
 				self.dir = 90
 			elif self.side == "down":
 				self.dir = 270
-	  
+
+		self.multiplier = 1.0
 		self.stick = 0
   
   

@@ -19,13 +19,13 @@ class Game:
 		self.pause = [False, Pause()]
 		self.end = End()
 		self.font = pg.font.Font(font, int(textSize))
-		self.max_score = 10
 		self.players = False
 		self.win = False
 		self.alias = 'ALIAS'
 		self.is_running = False
 
 	def start(self, websocket):
+		self.max_score = 10
 		self.ai = []
 		self.pressed = []
 		self.online = False

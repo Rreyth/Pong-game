@@ -176,6 +176,7 @@ class Ball:
 			elif self.side == "down":
 				self.dir = 270
 	  
+		self.multiplier = 1.0
 		self.stick = 0
   
   

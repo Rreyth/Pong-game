@@ -149,3 +149,4 @@ async def escape_handler(core):
 	if core.state == "custom":
 		core.state = "menu"
 		core.mode = "none"
+		core.max_score = 10

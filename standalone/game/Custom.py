@@ -52,6 +52,7 @@ class CustomMenu:
 				if button.name == "BACK TO MENU":
 					core.state = "menu"
 					core.mode = "none"
+					core.max_score = 10
 					break
 				elif button.name == "START":
 					self.start(core)

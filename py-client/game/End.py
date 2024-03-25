@@ -89,3 +89,5 @@ class End:
 			core.start_screen = False
 			core.wait_screen = False
 			core.ai = []
+			core.max_score = 10
+

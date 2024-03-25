@@ -25,6 +25,7 @@ class Pause:
 					core.mode = "none"
 					core.ai = []
 					core.start_screen = False
+					core.max_score = 10
 				core.pause[0] = False
 				self.freeze = False
      
